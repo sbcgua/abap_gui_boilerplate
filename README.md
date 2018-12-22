@@ -1,0 +1,3 @@
+# Boilerplate for abap applications with HTML UI and abapmerge
+
+TODO ...
