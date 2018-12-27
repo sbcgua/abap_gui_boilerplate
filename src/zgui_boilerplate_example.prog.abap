@@ -27,16 +27,16 @@ class lcl_home_component implementation.
     ro_html->add_a(
       iv_txt = 'Say hello'
       iv_act = c_action-say_hello
-      iv_typ = zif_abapgit_definitions=>c_action_type-sapevent
-      iv_opt = zif_abapgit_definitions=>c_html_opt-strong ).
+      iv_typ = zcl_abapgit_html=>c_action_type-sapevent
+      iv_opt = zcl_abapgit_html=>c_html_opt-strong ).
   endmethod.
 
   method zif_abapgit_gui_page~on_event.
-    ev_state = zif_abapgit_definitions=>c_event_state-not_handled.
+    ev_state = zcl_abapgit_gui=>c_event_state-not_handled.
     case iv_action.
       when c_action-say_hello.
         message 'Hello !' type 'S'.
-        ev_state = zif_abapgit_definitions=>c_event_state-no_more_act.
+        ev_state = zcl_abapgit_gui=>c_event_state-no_more_act.
     endcase.
   endmethod.
 
@@ -64,7 +64,7 @@ class lcl_gui_router implementation.
         ei_page  = lcl_page_hoc=>wrap(
           iv_page_title = 'Home page'
           ii_child      = lcl_home_component=>create( ) ).
-        ev_state = zif_abapgit_definitions=>c_event_state-new_page.
+        ev_state = zcl_abapgit_gui=>c_event_state-new_page.
     endcase.
   endmethod.
 endclass.
