@@ -9,7 +9,7 @@ endclass.
 
 class lcl_common_parts implementation.
 
-    method create_asset_manager.
+  method create_asset_manager.
     " used by abapmerge
     define _inline.
       append &1 to lt_data.
