@@ -8,3 +8,10 @@ body {
   background:  #e6f2ff;
   overflow-x:  hidden;
 }
+
+table {
+  border: 1px solid #333;
+}
+table td, table th {
+  border: 1px solid #333
+}

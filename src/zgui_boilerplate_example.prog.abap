@@ -115,7 +115,7 @@ class lcl_table_component implementation.
 
   method zif_abapgit_gui_page~render.
 
-    data lo_asset_man type ref to lcl_asset_manager.
+    data lo_asset_man type ref to zif_abapgit_gui_asset_manager.
     lo_asset_man ?= lcl_gui=>get_asset_man( ).
 
     create object ro_html.
@@ -176,7 +176,7 @@ class lcl_app definition final.
   private section.
     class-methods create_asset_manager
       returning
-        value(ro_asset_man) type ref to lcl_asset_manager.
+        value(ro_asset_man) type ref to zcl_abapgit_gui_asset_manager.
 
 endclass.
 
@@ -190,7 +190,7 @@ class lcl_app implementation.
 
     data lt_inline type string_table.
 
-    create object ro_asset_man type lcl_asset_manager.
+    create object ro_asset_man type zcl_abapgit_gui_asset_manager.
 
     clear lt_inline.
     " @@abapmerge include zgui_boilerplate_css_common.w3mi.data.css > _inline '$$'.
