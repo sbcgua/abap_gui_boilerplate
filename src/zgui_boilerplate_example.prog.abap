@@ -90,7 +90,6 @@ class lcl_table_component implementation.
     ls_data-value = 'User!'.
     append ls_data to rs_slug-items.
 
-
 *    types:
 *      begin of ty_tab,
 *        name type string,
@@ -151,9 +150,15 @@ endclass.
 class lcl_gui_router definition final.
   public section.
     interfaces zif_abapgit_gui_router.
+    class-methods create
+      returning
+        value(ro_router) type ref to lcl_gui_router.
 endclass.
 
 class lcl_gui_router implementation.
+  method create.
+    create object ro_router.
+  endmethod.
   method zif_abapgit_gui_router~on_event.
     case iv_action.
       when zcl_abapgit_gui=>c_action-go_home.
@@ -175,27 +180,17 @@ class lcl_app definition final.
     methods run
       raising
         zcx_abapgit_exception.
-  private section.
-
 endclass.
 
 class lcl_app implementation.
 
-
-
   method run.
 
-    data:
-      li_router    type ref to zif_abapgit_gui_router.
-
-
-
-
-    create object li_router type lcl_gui_router.
     lcl_gui=>run_gui(
-      ii_router    = li_router
+      ii_router    = lcl_gui_router=>create( )
       ii_asset_man = lcl_common_parts=>create_asset_manager( ) ).
 
+    " scenario todo
     " Call ALV with dummy data
       " prepare dummy data
       " create ALV, pass data, fill column names
