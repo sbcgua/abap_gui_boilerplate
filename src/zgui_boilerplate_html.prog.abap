@@ -79,23 +79,31 @@ class lcl_gui definition final.
     class-methods get_asset_man
       returning
         value(ri_asset_man) type ref to zif_abapgit_gui_asset_manager.
+    class-methods get_gui
+      returning
+        value(ro_gui) type ref to zcl_abapgit_gui.
   private section.
-    class-data mi_asset_man type ref to zif_abapgit_gui_asset_manager.
+    class-data gi_asset_man type ref to zif_abapgit_gui_asset_manager.
+    class-data go_gui_instance type ref to zcl_abapgit_gui.
 endclass.
 
 class lcl_gui implementation.
   method get_asset_man.
-    ri_asset_man = mi_asset_man.
+    ri_asset_man = gi_asset_man.
+  endmethod.
+  method get_gui.
+    ro_gui = go_gui_instance.
   endmethod.
   method run_gui.
     data lo_gui type ref to zcl_abapgit_gui.
 
-    mi_asset_man = ii_asset_man.
+    gi_asset_man = ii_asset_man.
 
     create object lo_gui
       exporting
         ii_router    = ii_router
         ii_asset_man = ii_asset_man.
+    go_gui_instance = lo_gui.
     lo_gui->go_home( ).
 
     call selection-screen 1001. " trigger screen
