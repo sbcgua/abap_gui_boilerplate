@@ -82,6 +82,7 @@ class lcl_gui definition final.
     class-methods get_gui
       returning
         value(ro_gui) type ref to zcl_abapgit_gui.
+    class-methods free.
   private section.
     class-data gi_asset_man type ref to zif_abapgit_gui_asset_manager.
     class-data go_gui_instance type ref to zcl_abapgit_gui.
@@ -107,5 +108,12 @@ class lcl_gui implementation.
     lo_gui->go_home( ).
 
     call selection-screen 1001. " trigger screen
+
+    free( ).
+  endmethod.
+  method free.
+    go_gui_instance->free( ).
+    clear go_gui_instance.
+    clear gi_asset_man.
   endmethod.
 endclass.
