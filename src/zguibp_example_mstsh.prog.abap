@@ -1,4 +1,4 @@
-report zgui_boilerplate_example_mstsh.
+report zguibp_example_mstsh.
 
 include zguibp_boilerplate.
 include zguibp_example_lib.
