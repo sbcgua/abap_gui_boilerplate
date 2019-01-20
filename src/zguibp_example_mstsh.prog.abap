@@ -30,7 +30,7 @@ class lcl_mustache_component implementation.
     data lo_asset_man type ref to zif_abapgit_gui_asset_manager.
     lo_asset_man ?= lcl_gui_factory=>get_asset_man( ).
 
-    create object ro_html.
+    create object ro_html type zcl_abapgit_html.
 
     data lv_template type string.
     data lv_out type string.

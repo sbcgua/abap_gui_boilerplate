@@ -32,7 +32,7 @@ class lcl_hello_component implementation.
 
   method zif_abapgit_gui_page~render.
 
-    create object ro_html.
+    create object ro_html type zcl_abapgit_html.
 
     " Render hello text and an image from asset manager
     ro_html->add( |<h1>Hello world from { mv_name }</h1>| ).
@@ -42,8 +42,8 @@ class lcl_hello_component implementation.
     ro_html->add_a(
       iv_txt = 'Say hello'
       iv_act = c_action-say_hello
-      iv_typ = zcl_abapgit_html=>c_action_type-sapevent
-      iv_opt = zcl_abapgit_html=>c_html_opt-strong ).
+      iv_typ = zif_abapgit_html=>c_action_type-sapevent
+      iv_opt = zif_abapgit_html=>c_html_opt-strong ).
 
     " render link to another page, if specified
     if mv_link is not initial.

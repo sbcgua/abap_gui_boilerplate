@@ -18,7 +18,7 @@ class lcl_page_hoc implementation.
 
   method zif_abapgit_gui_page~render.
 
-    create object ro_html.
+    create object ro_html type zcl_abapgit_html.
     ro_html->add( '<!DOCTYPE html>' ).                      "#EC NOTEXT
     ro_html->add( '<html>' ).                               "#EC NOTEXT
 

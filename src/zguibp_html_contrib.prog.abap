@@ -4,6 +4,7 @@
 
 " Changes:
 " - gui-on_error
+" - html interface
 
 * EXCEPTION
 
@@ -135,68 +136,255 @@ CLASS zcx_abapgit_exception IMPLEMENTATION.
   ENDMETHOD.
 ENDCLASS.
 
+* INTERFACES
+
+INTERFACE zif_abapgit_html.
+
+  CONSTANTS:
+    BEGIN OF c_action_type,
+      sapevent  TYPE c VALUE 'E',
+      url       TYPE c VALUE 'U',
+      onclick   TYPE c VALUE 'C',
+      separator TYPE c VALUE 'S',
+      dummy     TYPE c VALUE '_',
+    END OF c_action_type .
+  CONSTANTS:
+    BEGIN OF c_html_opt,
+      strong   TYPE c VALUE 'E',
+      cancel   TYPE c VALUE 'C',
+      crossout TYPE c VALUE 'X',
+    END OF c_html_opt .
+
+  METHODS add
+    IMPORTING
+      !ig_chunk TYPE any .
+  METHODS render
+    IMPORTING
+      !iv_no_indent_jscss TYPE abap_bool OPTIONAL
+    RETURNING
+      VALUE(rv_html)      TYPE string .
+  METHODS is_empty
+    RETURNING
+      VALUE(rv_yes) TYPE abap_bool .
+  METHODS add_a
+    IMPORTING
+      !iv_txt   TYPE string
+      !iv_act   TYPE string
+      !iv_typ   TYPE char1 DEFAULT c_action_type-sapevent
+      !iv_opt   TYPE clike OPTIONAL
+      !iv_class TYPE string OPTIONAL
+      !iv_id    TYPE string OPTIONAL
+      !iv_style TYPE string OPTIONAL.
+  CLASS-METHODS a
+    IMPORTING
+      !iv_txt       TYPE string
+      !iv_act       TYPE string
+      !iv_typ       TYPE char1 DEFAULT zif_abapgit_html=>c_action_type-sapevent
+      !iv_opt       TYPE clike OPTIONAL
+      !iv_class     TYPE string OPTIONAL
+      !iv_id        TYPE string OPTIONAL
+      !iv_style     TYPE string OPTIONAL
+    RETURNING
+      VALUE(rv_str) TYPE string .
+  CLASS-METHODS icon
+    IMPORTING
+      !iv_name      TYPE string
+      !iv_hint      TYPE string OPTIONAL
+      !iv_class     TYPE string OPTIONAL
+    RETURNING
+      VALUE(rv_str) TYPE string .
+
+ENDINTERFACE.
+
+INTERFACE zif_abapgit_gui_asset_manager .
+
+  TYPES:
+    BEGIN OF ty_web_asset,
+      url          TYPE w3url,
+      type         TYPE char50,
+      subtype      TYPE char50,
+      content      TYPE xstring,
+      is_cacheable TYPE abap_bool,
+    END OF ty_web_asset .
+  TYPES:
+    tt_web_assets TYPE STANDARD TABLE OF ty_web_asset WITH DEFAULT KEY .
+
+  METHODS get_all_assets
+    RETURNING
+      VALUE(rt_assets) TYPE tt_web_assets
+    RAISING
+      zcx_abapgit_exception.
+
+  METHODS get_asset
+    IMPORTING
+      iv_url          TYPE string
+    RETURNING
+      VALUE(rs_asset) TYPE ty_web_asset
+    RAISING
+      zcx_abapgit_exception.
+
+  METHODS get_text_asset
+    IMPORTING
+      iv_url          TYPE string
+    RETURNING
+      VALUE(rv_asset) TYPE string
+    RAISING
+      zcx_abapgit_exception.
+
+ENDINTERFACE.
+
+INTERFACE zif_abapgit_gui_page .
+
+  METHODS on_event
+    IMPORTING iv_action    TYPE clike
+              iv_prev_page TYPE clike
+              iv_getdata   TYPE clike OPTIONAL
+              it_postdata  TYPE cnht_post_data_tab OPTIONAL
+    EXPORTING ei_page      TYPE REF TO zif_abapgit_gui_page
+              ev_state     TYPE i
+    RAISING   zcx_abapgit_exception zcx_abapgit_cancel.
+
+  METHODS render
+    RETURNING VALUE(ro_html) TYPE REF TO zif_abapgit_html
+    RAISING   zcx_abapgit_exception.
+
+ENDINTERFACE.
+
+INTERFACE zif_abapgit_gui_router .
+
+  METHODS on_event
+    IMPORTING
+      iv_action    TYPE clike
+      iv_prev_page TYPE clike
+      iv_getdata   TYPE clike OPTIONAL
+      it_postdata  TYPE cnht_post_data_tab OPTIONAL
+    EXPORTING
+      ei_page      TYPE REF TO zif_abapgit_gui_page
+      ev_state     TYPE i
+    RAISING
+      zcx_abapgit_exception
+      zcx_abapgit_cancel.
+
+ENDINTERFACE.
+
+* UTILS
+
+CLASS zcl_abapgit_string_utils DEFINITION
+  FINAL
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+
+    CLASS-METHODS string_to_xstring
+      IMPORTING
+        iv_str         TYPE string
+      RETURNING
+        VALUE(rv_xstr) TYPE xstring.
+
+    CLASS-METHODS base64_to_xstring
+      IMPORTING
+        iv_base64      TYPE string
+      RETURNING
+        VALUE(rv_xstr) TYPE xstring.
+
+    CLASS-METHODS bintab_to_xstring
+      IMPORTING
+        it_bintab      TYPE lvc_t_mime
+        iv_size        TYPE i
+      RETURNING
+        VALUE(rv_xstr) TYPE xstring.
+
+    CLASS-METHODS xstring_to_bintab
+      IMPORTING
+        iv_xstr   TYPE xstring
+      EXPORTING
+        ev_size   TYPE i
+        et_bintab TYPE lvc_t_mime.
+
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+ENDCLASS.
+
+CLASS ZCL_ABAPGIT_STRING_UTILS IMPLEMENTATION.
+
+
+  METHOD base64_to_xstring.
+
+    CALL FUNCTION 'SSFC_BASE64_DECODE'
+      EXPORTING
+        b64data = iv_base64
+      IMPORTING
+        bindata = rv_xstr
+      EXCEPTIONS
+        OTHERS  = 1.
+    ASSERT sy-subrc = 0.
+
+  ENDMETHOD.
+
+
+  METHOD bintab_to_xstring.
+
+    CALL FUNCTION 'SCMS_BINARY_TO_XSTRING'
+      EXPORTING
+        input_length = iv_size
+      IMPORTING
+        buffer       = rv_xstr
+      TABLES
+        binary_tab   = it_bintab
+      EXCEPTIONS
+        failed       = 1 ##FM_SUBRC_OK.
+    ASSERT sy-subrc = 0.
+
+  ENDMETHOD.
+
+
+  METHOD string_to_xstring.
+
+    CALL FUNCTION 'SCMS_STRING_TO_XSTRING'
+      EXPORTING
+        text   = iv_str
+      IMPORTING
+        buffer = rv_xstr
+      EXCEPTIONS
+        OTHERS = 1.
+    ASSERT sy-subrc = 0.
+
+  ENDMETHOD.
+
+
+  METHOD xstring_to_bintab.
+
+    CALL FUNCTION 'SCMS_XSTRING_TO_BINARY'
+    EXPORTING
+      buffer        = iv_xstr
+    IMPORTING
+      output_length = ev_size
+    TABLES
+      binary_tab    = et_bintab.
+
+  ENDMETHOD.
+ENDCLASS.
+
 * HTML RENDERER
 
 CLASS zcl_abapgit_html DEFINITION
   CREATE PUBLIC.
 
   PUBLIC SECTION.
+    INTERFACES zif_abapgit_html.
+
+    ALIASES:
+      add      FOR zif_abapgit_html~add,
+      render   FOR zif_abapgit_html~render,
+      is_empty FOR zif_abapgit_html~is_empty,
+      add_a    FOR zif_abapgit_html~add_a,
+      a        FOR zif_abapgit_html~a,
+      icon     FOR zif_abapgit_html~icon.
 
     CONSTANTS c_indent_size TYPE i VALUE 2 ##NO_TEXT.
-    CONSTANTS:
-      BEGIN OF c_action_type,
-        sapevent  TYPE c VALUE 'E',
-        url       TYPE c VALUE 'U',
-        onclick   TYPE c VALUE 'C',
-        separator TYPE c VALUE 'S',
-        dummy     TYPE c VALUE '_',
-      END OF c_action_type .
-    CONSTANTS:
-      BEGIN OF c_html_opt,
-        strong   TYPE c VALUE 'E',
-        cancel   TYPE c VALUE 'C',
-        crossout TYPE c VALUE 'X',
-      END OF c_html_opt .
 
     CLASS-METHODS class_constructor .
-    METHODS add
-      IMPORTING
-        !ig_chunk TYPE any .
-    METHODS render
-      IMPORTING
-        !iv_no_indent_jscss TYPE abap_bool OPTIONAL
-      RETURNING
-        VALUE(rv_html)      TYPE string .
-    METHODS is_empty
-      RETURNING
-        VALUE(rv_yes) TYPE abap_bool .
-    METHODS add_a
-      IMPORTING
-        !iv_txt   TYPE string
-        !iv_act   TYPE string
-        !iv_typ   TYPE char1 DEFAULT zcl_abapgit_html=>c_action_type-sapevent
-        !iv_opt   TYPE clike OPTIONAL
-        !iv_class TYPE string OPTIONAL
-        !iv_id    TYPE string OPTIONAL
-        !iv_style TYPE string OPTIONAL.
-    CLASS-METHODS a
-      IMPORTING
-        !iv_txt       TYPE string
-        !iv_act       TYPE string
-        !iv_typ       TYPE char1 DEFAULT zcl_abapgit_html=>c_action_type-sapevent
-        !iv_opt       TYPE clike OPTIONAL
-        !iv_class     TYPE string OPTIONAL
-        !iv_id        TYPE string OPTIONAL
-        !iv_style     TYPE string OPTIONAL
-      RETURNING
-        VALUE(rv_str) TYPE string .
-    CLASS-METHODS icon
-      IMPORTING
-        !iv_name      TYPE string
-        !iv_hint      TYPE string OPTIONAL
-        !iv_class     TYPE string OPTIONAL
-      RETURNING
-        VALUE(rv_str) TYPE string .
+
   PROTECTED SECTION.
   PRIVATE SECTION.
     CLASS-DATA: go_single_tags_re TYPE REF TO cl_abap_regex.
@@ -249,13 +437,13 @@ CLASS ZCL_ABAPGIT_HTML IMPLEMENTATION.
 
     lv_class = iv_class.
 
-    IF iv_opt CA zcl_abapgit_html=>c_html_opt-strong.
+    IF iv_opt CA zif_abapgit_html=>c_html_opt-strong.
       lv_class = lv_class && ' emphasis' ##NO_TEXT.
     ENDIF.
-    IF iv_opt CA zcl_abapgit_html=>c_html_opt-cancel.
+    IF iv_opt CA zif_abapgit_html=>c_html_opt-cancel.
       lv_class = lv_class && ' attention' ##NO_TEXT.
     ENDIF.
-    IF iv_opt CA zcl_abapgit_html=>c_html_opt-crossout.
+    IF iv_opt CA zif_abapgit_html=>c_html_opt-crossout.
       lv_class = lv_class && ' crossout grey' ##NO_TEXT.
     ENDIF.
     IF lv_class IS NOT INITIAL.
@@ -264,16 +452,16 @@ CLASS ZCL_ABAPGIT_HTML IMPLEMENTATION.
     ENDIF.
 
     lv_href  = ' href="#"'. " Default, dummy
-    IF iv_act IS NOT INITIAL OR iv_typ = zcl_abapgit_html=>c_action_type-dummy.
+    IF iv_act IS NOT INITIAL OR iv_typ = zif_abapgit_html=>c_action_type-dummy.
       CASE iv_typ.
-        WHEN zcl_abapgit_html=>c_action_type-url.
+        WHEN zif_abapgit_html=>c_action_type-url.
           lv_href  = | href="{ iv_act }"|.
-        WHEN zcl_abapgit_html=>c_action_type-sapevent.
+        WHEN zif_abapgit_html=>c_action_type-sapevent.
           lv_href  = | href="sapevent:{ iv_act }"|.
-        WHEN zcl_abapgit_html=>c_action_type-onclick.
+        WHEN zif_abapgit_html=>c_action_type-onclick.
           lv_href  = ' href="#"'.
           lv_click = | onclick="{ iv_act }"|.
-        WHEN zcl_abapgit_html=>c_action_type-dummy.
+        WHEN zif_abapgit_html=>c_action_type-dummy.
           lv_href  = ' href="#"'.
       ENDCASE.
     ENDIF.
@@ -500,176 +688,6 @@ CLASS ZCL_ABAPGIT_HTML IMPLEMENTATION.
   ENDMETHOD.
 ENDCLASS.
 
-* INTERFACES
-
-INTERFACE zif_abapgit_gui_asset_manager .
-
-  TYPES:
-    BEGIN OF ty_web_asset,
-      url          TYPE w3url,
-      type         TYPE char50,
-      subtype      TYPE char50,
-      content      TYPE xstring,
-      is_cacheable TYPE abap_bool,
-    END OF ty_web_asset .
-  TYPES:
-    tt_web_assets TYPE STANDARD TABLE OF ty_web_asset WITH DEFAULT KEY .
-
-  METHODS get_all_assets
-    RETURNING
-      VALUE(rt_assets) TYPE tt_web_assets
-    RAISING
-      zcx_abapgit_exception.
-
-  METHODS get_asset
-    IMPORTING
-      iv_url          TYPE string
-    RETURNING
-      VALUE(rs_asset) TYPE ty_web_asset
-    RAISING
-      zcx_abapgit_exception.
-
-  METHODS get_text_asset
-    IMPORTING
-      iv_url          TYPE string
-    RETURNING
-      VALUE(rv_asset) TYPE string
-    RAISING
-      zcx_abapgit_exception.
-
-ENDINTERFACE.
-
-INTERFACE zif_abapgit_gui_page .
-
-  METHODS on_event
-    IMPORTING iv_action    TYPE clike
-              iv_prev_page TYPE clike
-              iv_getdata   TYPE clike OPTIONAL
-              it_postdata  TYPE cnht_post_data_tab OPTIONAL
-    EXPORTING ei_page      TYPE REF TO zif_abapgit_gui_page
-              ev_state     TYPE i
-    RAISING   zcx_abapgit_exception zcx_abapgit_cancel.
-
-  METHODS render
-    RETURNING VALUE(ro_html) TYPE REF TO zcl_abapgit_html
-    RAISING   zcx_abapgit_exception.
-
-ENDINTERFACE.
-
-INTERFACE zif_abapgit_gui_router .
-
-  METHODS on_event
-    IMPORTING
-      iv_action    TYPE clike
-      iv_prev_page TYPE clike
-      iv_getdata   TYPE clike OPTIONAL
-      it_postdata  TYPE cnht_post_data_tab OPTIONAL
-    EXPORTING
-      ei_page      TYPE REF TO zif_abapgit_gui_page
-      ev_state     TYPE i
-    RAISING
-      zcx_abapgit_exception
-      zcx_abapgit_cancel.
-
-ENDINTERFACE.
-
-* UTILS
-
-CLASS zcl_abapgit_string_utils DEFINITION
-  FINAL
-  CREATE PUBLIC .
-
-  PUBLIC SECTION.
-
-    CLASS-METHODS string_to_xstring
-      IMPORTING
-        iv_str         TYPE string
-      RETURNING
-        VALUE(rv_xstr) TYPE xstring.
-
-    CLASS-METHODS base64_to_xstring
-      IMPORTING
-        iv_base64      TYPE string
-      RETURNING
-        VALUE(rv_xstr) TYPE xstring.
-
-    CLASS-METHODS bintab_to_xstring
-      IMPORTING
-        it_bintab      TYPE lvc_t_mime
-        iv_size        TYPE i
-      RETURNING
-        VALUE(rv_xstr) TYPE xstring.
-
-    CLASS-METHODS xstring_to_bintab
-      IMPORTING
-        iv_xstr   TYPE xstring
-      EXPORTING
-        ev_size   TYPE i
-        et_bintab TYPE lvc_t_mime.
-
-  PROTECTED SECTION.
-  PRIVATE SECTION.
-ENDCLASS.
-
-CLASS ZCL_ABAPGIT_STRING_UTILS IMPLEMENTATION.
-
-
-  METHOD base64_to_xstring.
-
-    CALL FUNCTION 'SSFC_BASE64_DECODE'
-      EXPORTING
-        b64data = iv_base64
-      IMPORTING
-        bindata = rv_xstr
-      EXCEPTIONS
-        OTHERS  = 1.
-    ASSERT sy-subrc = 0.
-
-  ENDMETHOD.
-
-
-  METHOD bintab_to_xstring.
-
-    CALL FUNCTION 'SCMS_BINARY_TO_XSTRING'
-      EXPORTING
-        input_length = iv_size
-      IMPORTING
-        buffer       = rv_xstr
-      TABLES
-        binary_tab   = it_bintab
-      EXCEPTIONS
-        failed       = 1 ##FM_SUBRC_OK.
-    ASSERT sy-subrc = 0.
-
-  ENDMETHOD.
-
-
-  METHOD string_to_xstring.
-
-    CALL FUNCTION 'SCMS_STRING_TO_XSTRING'
-      EXPORTING
-        text   = iv_str
-      IMPORTING
-        buffer = rv_xstr
-      EXCEPTIONS
-        OTHERS = 1.
-    ASSERT sy-subrc = 0.
-
-  ENDMETHOD.
-
-
-  METHOD xstring_to_bintab.
-
-    CALL FUNCTION 'SCMS_XSTRING_TO_BINARY'
-    EXPORTING
-      buffer        = iv_xstr
-    IMPORTING
-      output_length = ev_size
-    TABLES
-      binary_tab    = et_bintab.
-
-  ENDMETHOD.
-ENDCLASS.
 
 * ASSET MANAGER
 
@@ -1168,10 +1186,10 @@ CLASS ZCL_ABAPGIT_GUI IMPLEMENTATION.
   METHOD render.
 
     DATA: lv_url  TYPE w3url,
-          lo_html TYPE REF TO zcl_abapgit_html.
+          li_html TYPE REF TO zif_abapgit_html.
 
-    lo_html = mi_cur_page->render( ).
-    lv_url  = cache_html( lo_html->render( iv_no_indent_jscss = abap_true ) ).
+    li_html = mi_cur_page->render( ).
+    lv_url  = cache_html( li_html->render( iv_no_indent_jscss = abap_true ) ).
 
     mo_html_viewer->show_url( lv_url ).
 
