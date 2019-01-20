@@ -9,5 +9,6 @@ at selection-screen on exit-command.
 at selection-screen output.
   perform htmlscr_hide_standard_buttons.
 
+include zguibp_html_contrib.
 include zguibp_html_classes.
 include zguibp_forms.
