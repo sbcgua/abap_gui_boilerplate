@@ -215,14 +215,6 @@ CLASS lcl_salv_enabler IMPLEMENTATION.
 
     check lo_grid is bound.
 
-* … toolbar button check
-    clear ls_toolbar.
-    ls_toolbar-function    = cl_gui_alv_grid=>mc_fc_check.
-    ls_toolbar-quickinfo  = text-053.  "eingaben prfen
-    ls_toolbar-icon        = icon_check.
-    ls_toolbar-disabled    = space.
-    append ls_toolbar to lt_toolbar.
-
 * … toolbar seperator
     clear ls_toolbar.
     ls_toolbar-function    = '&&sep01'.

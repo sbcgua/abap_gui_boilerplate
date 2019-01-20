@@ -12,14 +12,14 @@ endform.
 
 form main.
 
-  data lx_exception type ref to zcx_abapgit_exception.
+  data lx type ref to cx_root.
   data lo_app type ref to lcl_app.
 
   try.
     create object lo_app.
     lo_app->run( ).
-  catch zcx_abapgit_exception into lx_exception.
-    message lx_exception type 'E'.
+  catch cx_root into lx.
+    message lx type 'E'.
   endtry.
 
 endform.                    "run

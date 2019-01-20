@@ -1,5 +1,6 @@
 report zguibp_example_mstsh.
 
+include zguibp_error.
 include zguibp_html.
 include zguibp_example_common.
 include zmustache.
@@ -27,7 +28,7 @@ class lcl_mustache_component implementation.
   method zif_abapgit_gui_page~render.
 
     data lo_asset_man type ref to zif_abapgit_gui_asset_manager.
-    lo_asset_man ?= lcl_gui=>get_asset_man( ).
+    lo_asset_man ?= lcl_gui_factory=>get_asset_man( ).
 
     create object ro_html.
 
@@ -98,16 +99,15 @@ class lcl_app definition final.
   public section.
     methods run
       raising
-        zcx_abapgit_exception.
+        lcx_guibp_error.
 endclass.
 
 class lcl_app implementation.
   method run.
-
-    lcl_gui=>run_gui(
+    lcl_gui_factory=>init(
       ii_router    = lcl_gui_router=>create( )
       ii_asset_man = lcl_common_parts=>create_asset_manager( ) ).
-
+    lcl_gui_factory=>run( ).
   endmethod.
 endclass.
 

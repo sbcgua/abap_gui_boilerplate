@@ -1,7 +1,7 @@
 form exit raising zcx_abapgit_exception.
   case sy-ucomm.
     when 'CBAC'.  "back
-      if sy-dynnr = '1001' and lcl_gui=>get_gui( )->back( ) is initial.
+      if sy-dynnr = '1001' and lcl_gui_factory=>get_gui( )->back( ) is initial.
         leave to screen 1001.
       endif.
   endcase.

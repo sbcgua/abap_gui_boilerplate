@@ -41,16 +41,15 @@ class lcl_html_view definition final.
       importing
         iv_payload type string
       raising
-        zcx_abapgit_exception.
+        lcx_guibp_error.
 endclass.
 
 class lcl_html_view implementation.
   method run.
-
-    lcl_gui=>run_gui(
+    lcl_gui_factory=>init(
       ii_router    = lcl_gui_router=>create( iv_payload )
       ii_asset_man = lcl_common_parts=>create_asset_manager( ) ).
-
+    lcl_gui_factory=>run( ).
   endmethod.
 endclass.
 
@@ -151,10 +150,6 @@ class lcl_content_view implementation.
     set handler on_alv_user_command for lo_event.
     set handler on_before_salv_function for lo_event.
 
-*    data: lo_selections type ref to cl_salv_selections.
-*    lo_selections = mo_alv->get_selections( ).
-*    lo_selections->set_selection_mode( if_salv_c_selection_mode=>multiple ).
-
 *    data lo_sorts type ref to cl_salv_sorts.
 *    lo_sorts = mo_alv->get_sorts( ).
 
@@ -178,29 +173,6 @@ class lcl_content_view implementation.
     data lv_msg type string.
     lv_msg = |User asked { iv_cmd }|.
     message lv_msg type 'S'.
-
-*    data: lo_selections type ref to cl_salv_selections.
-*    lo_selections = mo_alv->get_selections( ).
-*
-*    data lt_rows type salv_t_row.
-*    data lv_row like line of lt_rows.
-*    lt_rows = lo_selections->get_selected_rows( ).
-*
-*    case iv_cmd.
-*      when '%DEL'.
-*        read table lt_rows index 1 into lv_row.
-*        if sy-subrc is initial. " TODO improve
-*          data lv_path type string.
-*          field-symbols <mock> like line of mt_mock_index.
-*          read table mt_mock_index assigning <mock> index lv_row.
-*          assert sy-subrc is initial.
-*          lv_path = <mock>-folder && '/' && <mock>-name.
-*          raise event request_mock_delete exporting mock_name = lv_path.
-*        endif.
-*
-*      when others.
-*    endcase.
-
   endmethod.                    "on_user_command
 
   method on_before_salv_function.
@@ -218,14 +190,14 @@ class lcl_content_view implementation.
     field-symbols <name> type string.
     assign component 'NAME' of structure <line> to <name>.
 
-*    data lv_path type string.
-*    assert sy-subrc is initial.
-*    lv_path = <mock>-folder && '/' && <mock>-name.
-*    raise event mock_selected exporting mock_name = lv_path.
-
     data lo_html type ref to lcl_html_view.
+    data lx type ref to lcx_guibp_error.
     create object lo_html.
-    lo_html->run( <name> ).
+    try .
+      lo_html->run( <name> ).
+    catch lcx_guibp_error into lx.
+      message lx type 'E' display like 'S'.
+    endtry.
 
   endmethod.
 
@@ -251,7 +223,7 @@ class lcl_app definition final.
 
     methods run
       raising
-        zcx_abapgit_exception lcx_guibp_error.
+        lcx_guibp_error.
 
     methods prepare_data
       returning value(rt_data) type tt_my_type.

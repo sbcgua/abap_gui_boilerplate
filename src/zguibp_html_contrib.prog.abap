@@ -2,6 +2,9 @@
 * the below code is mostly based on abapGit html components
 **********************************************************************
 
+" Changes:
+" - gui-on_error
+
 * EXCEPTION
 
 CLASS zcx_abapgit_cancel DEFINITION
@@ -894,6 +897,10 @@ CLASS zcl_abapgit_gui DEFINITION FINAL .
 
     METHODS free.
 
+    EVENTS on_error
+      EXPORTING
+        VALUE(io_exception) TYPE REF TO cx_root.
+
   PROTECTED SECTION.
   PRIVATE SECTION.
 
@@ -1138,8 +1145,7 @@ CLASS ZCL_ABAPGIT_GUI IMPLEMENTATION.
         ENDCASE.
 
       CATCH zcx_abapgit_exception INTO lx_exception.
-        ROLLBACK WORK.
-        MESSAGE lx_exception TYPE 'S' DISPLAY LIKE 'E'.
+        RAISE EVENT on_error EXPORTING io_exception = lx_exception.
       CATCH zcx_abapgit_cancel ##NO_HANDLER.
         " Do nothing = gc_event_state-no_more_act
     ENDTRY.
