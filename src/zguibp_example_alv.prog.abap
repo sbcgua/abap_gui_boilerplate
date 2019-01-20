@@ -135,7 +135,7 @@ class lcl_content_view implementation.
 
     data: lo_functions type ref to cl_salv_functions_list.
     lo_functions = mo_alv->get_functions( ).
-*    lo_functions->set_default( abap_true ).
+    lo_functions->set_default( abap_true ).
 *    lo_functions->get_flavour( ).
 *    mo_alv->set_screen_status( report = sy-cprog pfstatus = 'CONTENTS_VIEW' ).
 
@@ -150,15 +150,14 @@ class lcl_content_view implementation.
     set handler on_alv_user_command for lo_event.
     set handler on_before_salv_function for lo_event.
 
-*    data lo_sorts type ref to cl_salv_sorts.
-*    lo_sorts = mo_alv->get_sorts( ).
+    data lo_sorts type ref to cl_salv_sorts.
+    lo_sorts = mo_alv->get_sorts( ).
 
-*    try.
-*      lo_sorts->add_sort( 'FOLDER' ).
-*      lo_sorts->add_sort( 'NAME' ).
-*    catch cx_salv_error into lx_alv.
-*      lcx_error=>raise( lx_alv->get_text( ) ).
-*    endtry.
+    try.
+      lo_sorts->add_sort( 'NAME' ).
+    catch cx_salv_error into lx_alv.
+      lcx_guibp_error=>raise( lx_alv->get_text( ) ).
+    endtry.
 
     lcl_salv_enabler=>toggle_toolbar( mo_alv ).
 
@@ -208,7 +207,7 @@ class lcl_content_view implementation.
 
 endclass.
 
-
+**********************************************************************
 
 class lcl_app definition final.
   public section.
@@ -250,12 +249,9 @@ class lcl_app implementation.
   endmethod.
 
   method run.
-
     data lo_alv type ref to lcl_content_view.
     create object lo_alv exporting it_contents = prepare_data( ).
     lo_alv->display( ).
-
-
   endmethod.
 endclass.
 
