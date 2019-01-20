@@ -9,5 +9,5 @@ at selection-screen on exit-command.
 at selection-screen output.
   perform hide_standard_buttons.
 
-include zgui_boilerplate_html.
-include zgui_boilerplate_forms.
+include zguibp_html.
+include zguibp_forms.

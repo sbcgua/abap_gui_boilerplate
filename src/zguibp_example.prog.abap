@@ -1,7 +1,7 @@
-report zgui_boilerplate_example.
+report zguibp_example.
 
-include zgui_boilerplate.
-include zgui_boilerplate_example_lib.
+include zguibp_boilerplate.
+include zguibp_example_lib.
 
 class lcl_home_component definition final.
   public section.

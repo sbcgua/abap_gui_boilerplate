@@ -3,18 +3,19 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <PROGDIR>
-    <NAME>ZGUI_BOILERPLATE</NAME>
+    <NAME>ZGUIBP_EXAMPLE</NAME>
     <STATE>A</STATE>
     <VARCL>X</VARCL>
-    <SUBC>I</SUBC>
+    <SUBC>1</SUBC>
     <RLOAD>E</RLOAD>
+    <FIXPT>X</FIXPT>
     <UCCHECK>X</UCCHECK>
    </PROGDIR>
    <TPOOL>
     <item>
      <ID>R</ID>
-     <ENTRY>GUI boilerplate include</ENTRY>
-     <LENGTH>23</LENGTH>
+     <ENTRY>GUI boilerplate</ENTRY>
+     <LENGTH>15</LENGTH>
     </item>
    </TPOOL>
   </asx:values>

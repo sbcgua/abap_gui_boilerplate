@@ -85,19 +85,5 @@ form hide_standard_buttons.
 endform.
 
 form boilerplate_init.
-
-  DATA: lt_ucomm TYPE TABLE OF sy-ucomm.
-
-  PERFORM set_pf_status IN PROGRAM rsdbrunt IF FOUND.
-
-  APPEND 'CRET' TO lt_ucomm.  "Button Execute
-  APPEND 'SPOS' TO lt_ucomm.  "Button Save
-
-  CALL FUNCTION 'RS_SET_SELSCREEN_STATUS'
-    EXPORTING
-      p_status  = sy-pfkey
-    TABLES
-      p_exclude = lt_ucomm.
-
   perform remove_toolbar using '1001'. " remove toolbar on html screen
 endform.

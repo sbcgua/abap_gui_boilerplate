@@ -24,7 +24,7 @@ class lcl_common_parts implementation.
     ro_asset_man->register_asset(
       iv_url       = 'css/common.css'
       iv_type      = 'text/css'
-      iv_mime_name = 'ZGUI_BOILERPLATE_CSS_COMMON'
+      iv_mime_name = 'ZGUIBP_CSS_COMMON'
       iv_inline    = concat_lines_of( table = lt_inline sep = cl_abap_char_utilities=>newline ) ).
 
     clear lt_inline.
@@ -32,7 +32,7 @@ class lcl_common_parts implementation.
     ro_asset_man->register_asset(
       iv_url       = 'js/common.js'
       iv_type      = 'text/javascript'
-      iv_mime_name = 'ZGUI_BOILERPLATE_JS_COMMON'
+      iv_mime_name = 'ZGUIBP_JS_COMMON'
       iv_inline    = concat_lines_of( table = lt_inline sep = cl_abap_char_utilities=>newline ) ).
 
     clear lt_inline.
@@ -40,7 +40,7 @@ class lcl_common_parts implementation.
     ro_asset_man->register_asset(
       iv_url       = 'templates/table.mustache'
       iv_type      = 'text/plain'
-      iv_mime_name = 'ZGUI_BOILERPLATE_EXAMPLE_TAB'
+      iv_mime_name = 'ZGUIBP_EXAMPLE_TAB'
       iv_cachable  = abap_false
       iv_inline    = concat_lines_of( table = lt_inline sep = cl_abap_char_utilities=>newline ) ).
 

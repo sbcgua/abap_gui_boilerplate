@@ -2,24 +2,24 @@
 <abapGit version="v1.0.0" serializer="LCL_OBJECT_W3MI" serializer_version="v2.0.0">
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
-   <NAME>ZGUI_BOILERPLATE_CSS_COMMON</NAME>
+   <NAME>ZGUIBP_CSS_COMMON</NAME>
    <TEXT>Common CSS for GUI boilerplate</TEXT>
    <PARAMS>
     <WWWPARAMS>
      <RELID>MI</RELID>
-     <OBJID>ZGUI_BOILERPLATE_CSS_COMMON</OBJID>
+     <OBJID>ZGUIBP_CSS_COMMON</OBJID>
      <NAME>fileextension</NAME>
      <VALUE>.css</VALUE>
     </WWWPARAMS>
     <WWWPARAMS>
      <RELID>MI</RELID>
-     <OBJID>ZGUI_BOILERPLATE_CSS_COMMON</OBJID>
+     <OBJID>ZGUIBP_CSS_COMMON</OBJID>
      <NAME>filename</NAME>
      <VALUE>gui-boilerplate.css</VALUE>
     </WWWPARAMS>
     <WWWPARAMS>
      <RELID>MI</RELID>
-     <OBJID>ZGUI_BOILERPLATE_CSS_COMMON</OBJID>
+     <OBJID>ZGUIBP_CSS_COMMON</OBJID>
      <NAME>mimetype</NAME>
      <VALUE>text/css</VALUE>
     </WWWPARAMS>

@@ -2,26 +2,26 @@
 <abapGit version="v1.0.0" serializer="LCL_OBJECT_W3MI" serializer_version="v2.0.0">
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
-   <NAME>ZGUI_BOILERPLATE_JS_COMMON</NAME>
-   <TEXT>Common JS for GUI boilerplate</TEXT>
+   <NAME>ZGUIBP_EXAMPLE_TAB</NAME>
+   <TEXT>Table mustache</TEXT>
    <PARAMS>
     <WWWPARAMS>
      <RELID>MI</RELID>
-     <OBJID>ZGUI_BOILERPLATE_JS_COMMON</OBJID>
+     <OBJID>ZGUIBP_EXAMPLE_TAB</OBJID>
      <NAME>fileextension</NAME>
-     <VALUE>.js</VALUE>
+     <VALUE>.mustache</VALUE>
     </WWWPARAMS>
     <WWWPARAMS>
      <RELID>MI</RELID>
-     <OBJID>ZGUI_BOILERPLATE_JS_COMMON</OBJID>
+     <OBJID>ZGUIBP_EXAMPLE_TAB</OBJID>
      <NAME>filename</NAME>
-     <VALUE>gui-boilerplate.js</VALUE>
+     <VALUE>table.mustache</VALUE>
     </WWWPARAMS>
     <WWWPARAMS>
      <RELID>MI</RELID>
-     <OBJID>ZGUI_BOILERPLATE_JS_COMMON</OBJID>
+     <OBJID>ZGUIBP_EXAMPLE_TAB</OBJID>
      <NAME>mimetype</NAME>
-     <VALUE>text/javascript</VALUE>
+     <VALUE>text/html</VALUE>
     </WWWPARAMS>
    </PARAMS>
   </asx:values>

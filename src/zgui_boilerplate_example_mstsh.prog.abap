@@ -1,7 +1,7 @@
 report zgui_boilerplate_example_mstsh.
 
-include zgui_boilerplate.
-include zgui_boilerplate_example_lib.
+include zguibp_boilerplate.
+include zguibp_example_lib.
 include zmustache.
 
 class lcl_mustache_component definition final.
