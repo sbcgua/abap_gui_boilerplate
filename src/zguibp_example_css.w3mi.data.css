@@ -1,0 +1,28 @@
+body {
+  background:  #ffffe6;
+}
+#debug-output {
+  text-align: left;
+  padding-left: 0.5em;
+  margin-top: 1em;
+}
+
+table {
+  border: 1px solid #333;
+}
+table td, table th {
+  border: 1px solid #333;
+  padding: 4px 8px;
+}
+tr:first-child td:first-child {
+  background-color: #b2b2ff;
+}
+tr:first-child td:last-child {
+  background-color: #fa9f9f;
+}
+tr:last-child td:first-child {
+  background-color: #ffff6d;
+}
+tr:last-child td:last-child {
+  background-color: #c0ffc0;
+}

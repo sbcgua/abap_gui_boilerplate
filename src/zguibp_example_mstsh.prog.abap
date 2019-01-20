@@ -88,6 +88,7 @@ class lcl_gui_router implementation.
     case iv_action.
       when zcl_abapgit_gui=>c_action-go_home.
         ei_page  = lcl_page_hoc=>wrap(
+          iv_add_styles = 'css/example.css'
           iv_page_title = 'Mustache page'
           ii_child      = lcl_mustache_component=>create( ) ).
         ev_state = zcl_abapgit_gui=>c_event_state-new_page.

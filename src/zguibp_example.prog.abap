@@ -24,8 +24,11 @@ class lcl_gui_router implementation.
     case iv_action.
       when zcl_abapgit_gui=>c_action-go_home.
         ei_page  = lcl_page_hoc=>wrap(
-          iv_page_title = 'Home page'
-          ii_child      = lcl_hello_component=>create( iv_name = 'Home page' iv_link = 'goto-page2' ) ).
+          iv_show_debug_div  = abap_true
+          iv_before_body_end = '<script type="text/javascript">confirmInitialized();</script>'
+          iv_add_styles      = 'css/example.css'
+          iv_page_title      = 'Home page'
+          ii_child           = lcl_hello_component=>create( iv_name = 'Home page' iv_link = 'goto-page2' ) ).
         ev_state = zcl_abapgit_gui=>c_event_state-new_page.
       when 'goto-page2'.
         ei_page  = lcl_page_hoc=>wrap(

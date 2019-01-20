@@ -5,14 +5,57 @@
 body {
   font-family: Arial,Helvetica,sans-serif;
   font-size:   12pt;
-  background:  #ffffe6;
+  background:  #E8E8E8;
   overflow-x:  hidden;
 }
 
-table {
-  border: 1px solid #333;
+a, a:visited {
+  color:            #4078c0;
+  text-decoration:  none;
 }
-table td, table th {
-  border: 1px solid #333;
-  padding: 4px 8px;
+
+a:hover, a:active {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* USEFUL COLORS */
+.grey             { color: lightgrey  !important; }
+.grey70           { color: #b3b3b3    !important; }
+.grey80           { color: #cccccc    !important; }
+.darkgrey         { color: #808080    !important; }
+.blue             { color: #5e8dc9    !important; }
+.red              { color: red        !important; }
+.white            { color: white      !important; }
+
+/* ZCL_ABAPGIT_HTML opt styles */
+.success          { color: green   	  !important; }
+.error            { color: #d41919    !important; }
+.warning          { color: #efb301    !important; }
+.attention        { color: red        !important; }
+.emphasis         { font-weight: bold !important; }
+.crossout         { text-decoration: line-through !important; }
+
+/* LAYOUT MODIFIERS */
+.right            { text-align: right; }
+.center           { text-align: center; }
+.w100             { width: 100%; }
+.wmin             { width: 1%; }
+.float-right      { float: right; }
+.inline           { display: inline; }
+
+.pad-05           { padding: 0.5em 0.5em; }
+.pad-4px          { padding: 4px; }
+.pad-h03          { padding-left: 0.3em; padding-right: 0.3em; }
+.margin-v05       { margin-top: 0.5em; margin-bottom: 0.5em; }
+.indent-l05       { padding-left: 0.5em; }
+.pad-r6px         { padding-right: 6px; }
+
+/* DEBUG */
+#debug-output {
+  text-align: right;
+  padding-right: 0.5em;
+  color: #ccc;
+  font-style: italic;
+  font-size: small;
 }

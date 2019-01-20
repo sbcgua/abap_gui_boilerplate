@@ -2,6 +2,10 @@
  * GUI boilerplate JS function library
  **********************************************************/
 
+/**********************************************************
+ * Polyfills
+ **********************************************************/
+
 // Bind polyfill (for IE7), taken from https://developer.mozilla.org/
 if (!Function.prototype.bind) {
   Function.prototype.bind = function(oThis) {
@@ -9,15 +13,15 @@ if (!Function.prototype.bind) {
       throw new TypeError("Function.prototype.bind - subject is not callable");
     }
 
-    var aArgs   = Array.prototype.slice.call(arguments, 1),
-        fToBind = this,
-        fNOP    = function() {},
-        fBound  = function() {
-          return fToBind.apply(this instanceof fNOP
-                 ? this
-                 : oThis,
-                 aArgs.concat(Array.prototype.slice.call(arguments)));
-        };
+    var aArgs   = Array.prototype.slice.call(arguments, 1);
+    var fToBind = this;
+    var fNOP    = function() {};
+    var fBound  = function() {
+      return fToBind.apply(
+        this instanceof fNOP ? this : oThis,
+        aArgs.concat(Array.prototype.slice.call(arguments))
+      );
+    };
 
     if (this.prototype) {
       fNOP.prototype = this.prototype;
@@ -52,7 +56,9 @@ if (!String.prototype.includes) {
 function debugOutput(text, dstID) {
   var stdout = document.getElementById(dstID || "debug-output");
   if (stdout) {
-    stdout.innerHTML = stdout.innerText + "\n" + text;
+    var t = stdout.innerText;
+    t += (t && "\n") + text;
+    stdout.innerHTML = t;
   }
 }
 
@@ -82,4 +88,9 @@ function setInitialFocus(id) {
 // Submit an existing form
 function submitFormById(id) {
   document.getElementById(id).submit();
+}
+
+// confirm JS initilization
+function confirmInitialized() {
+  debugOutput("js: OK");
 }

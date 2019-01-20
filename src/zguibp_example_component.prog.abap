@@ -35,7 +35,7 @@ class lcl_hello_component implementation.
     create object ro_html type zcl_abapgit_html.
 
     " Render hello text and an image from asset manager
-    ro_html->add( |<h1>Hello world from { mv_name }</h1>| ).
+    ro_html->add( |<h1>Hello world from *{ mv_name }*</h1>| ).
     ro_html->add( '<img src="img/test.png" alt="test">' ).
 
     " render local action link

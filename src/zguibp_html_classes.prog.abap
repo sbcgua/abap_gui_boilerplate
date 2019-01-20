@@ -4,41 +4,58 @@ class lcl_page_hoc definition final.
 
     class-methods wrap
       importing
-        iv_page_title type string
-        ii_child      type ref to zif_abapgit_gui_page
+        iv_page_title      type string
+        ii_child           type ref to zif_abapgit_gui_page
+        iv_show_debug_div  type abap_bool default abap_false
+        iv_before_body_end type string optional
+        iv_add_styles      type any optional
       returning
         value(ro_page) type ref to lcl_page_hoc.
 
   private section.
-    data mv_page_title type string.
-    data mi_child type ref to zif_abapgit_gui_page.
+    data mv_page_title      type string.
+    data mi_child           type ref to zif_abapgit_gui_page.
+    data mv_show_debug_div  type abap_bool.
+    data mv_before_body_end type string.
+    data mt_add_styles      type string_table.
 endclass.
 
 class lcl_page_hoc implementation.
 
   method zif_abapgit_gui_page~render.
 
+    field-symbols <s> like line of mt_add_styles.
+
     create object ro_html type zcl_abapgit_html.
     ro_html->add( '<!DOCTYPE html>' ).                      "#EC NOTEXT
     ro_html->add( '<html>' ).                               "#EC NOTEXT
 
     ro_html->add( '<head>' ).                               "#EC NOTEXT
-
     ro_html->add( '<meta http-equiv="content-type" content="text/html; charset=utf-8">' ). "#EC NOTEXT
     ro_html->add( '<meta http-equiv="X-UA-Compatible" content="IE=11,10,9,8" />' ).        "#EC NOTEXT
     ro_html->add( |<title>{ mv_page_title }</title>| ).                                    "#EC NOTEXT
     ro_html->add( '<link rel="stylesheet" type="text/css" href="css/common.css">' ).       "#EC NOTEXT
     ro_html->add( '<script type="text/javascript" src="js/common.js"></script>' ).         "#EC NOTEXT
+
+    loop at mt_add_styles assigning <s>.
+      ro_html->add( |<link rel="stylesheet" type="text/css" href="{ <s> }">| ).     "#EC NOTEXT
+    endloop.
+
     ro_html->add( '</head>' ).                              "#EC NOTEXT
 
     ro_html->add( '<body>' ).                               "#EC NOTEXT
     ro_html->add( '<div id="root">' ).                      "#EC NOTEXT
     ro_html->add( mi_child->render( ) ).
     ro_html->add( '</div>' ).                               "#EC NOTEXT
+
+    if mv_show_debug_div = abap_true.
+      ro_html->add( '<div id="debug-output"></div>' ).      "#EC NOTEXT
+    endif.
+    if mv_before_body_end is not initial.
+      ro_html->add( mv_before_body_end ). " can be used for end script section
+    endif.
+
     ro_html->add( '</body>' ).                              "#EC NOTEXT
-
-* TODO render after_body, html or component ???
-
     ro_html->add( '</html>' ).                              "#EC NOTEXT
 
   endmethod.
@@ -60,8 +77,20 @@ class lcl_page_hoc implementation.
   method wrap.
 
     create object ro_page.
-    ro_page->mv_page_title = iv_page_title.
-    ro_page->mi_child = ii_child.
+    ro_page->mv_page_title      = iv_page_title.
+    ro_page->mi_child           = ii_child.
+    ro_page->mv_show_debug_div  = iv_show_debug_div.
+    ro_page->mv_before_body_end = iv_before_body_end.
+
+    data lv_type type c.
+    if iv_add_styles is not initial.
+      describe field iv_add_styles type lv_type.
+      if lv_type co 'Cg'.
+        append iv_add_styles to ro_page->mt_add_styles.
+      elseif lv_type = 'h'.
+        ro_page->mt_add_styles = iv_add_styles. " Assume string_table
+      endif. " Ignore errors ?
+    endif.
 
   endmethod.
 
