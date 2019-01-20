@@ -64,7 +64,7 @@ form remove_toolbar using pv_dynnr type char4.
 
 endform.
 
-form hide_standard_buttons.
+form htmlscr_hide_standard_buttons.
 
   if sy-dynnr <> '1001'.
     return.
@@ -84,6 +84,6 @@ form hide_standard_buttons.
 
 endform.
 
-form boilerplate_init.
+form htmlscr_init.
   perform remove_toolbar using '1001'. " remove toolbar on html screen
 endform.

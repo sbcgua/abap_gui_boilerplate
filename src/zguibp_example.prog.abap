@@ -1,8 +1,10 @@
 report zguibp_example.
 
-include zguibp_boilerplate.
+include zguibp_html.
 include zguibp_example_lib.
 
+* Hello world component
+* must implement zif_abapgit_gui_page
 class lcl_home_component definition final.
   public section.
     interfaces zif_abapgit_gui_page.
@@ -18,9 +20,11 @@ class lcl_home_component definition final.
         iv_link type string optional
       returning
         value(ro_component) type ref to lcl_home_component.
+
   private section.
     data mv_name type string.
     data mv_link type string.
+
 endclass.
 
 class lcl_home_component implementation.
@@ -60,6 +64,8 @@ class lcl_home_component implementation.
 
 endclass.
 
+* global router
+* must implement zif_abapgit_gui_router
 class lcl_gui_router definition final.
   public section.
     interfaces zif_abapgit_gui_router.
@@ -106,35 +112,4 @@ class lcl_app implementation.
   endmethod.
 endclass.
 
-selection-screen begin of block b1 with frame title txt_b1.
-selection-screen begin of line.
-selection-screen comment (24) t_dir for field p_dir.
-parameters p_dir type char255 visible length 40.
-selection-screen end of line.
-selection-screen end of block b1.
-
-form init.
-  txt_b1   = 'Program params'.        "#EC NOTEXT
-  t_dir    = 'Param 1'.               "#EC NOTEXT
-endform.
-
-form main.
-
-  data lx_exception type ref to zcx_abapgit_exception.
-  data lo_app type ref to lcl_app.
-
-  try.
-    create object lo_app.
-    lo_app->run( ).
-  catch zcx_abapgit_exception into lx_exception.
-    message lx_exception type 'E'.
-  endtry.
-
-endform.                    "run
-
-initialization.
-  perform boilerplate_init.
-  perform init.
-
-start-of-selection.
-  perform main.
+include zguibp_example_run.

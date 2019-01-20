@@ -3,7 +3,7 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <PROGDIR>
-    <NAME>ZGUIBP_HTML</NAME>
+    <NAME>ZGUIBP_HTML_CLASSES</NAME>
     <STATE>A</STATE>
     <VARCL>X</VARCL>
     <SUBC>I</SUBC>
@@ -13,8 +13,8 @@
    <TPOOL>
     <item>
      <ID>R</ID>
-     <ENTRY>GUI boilerplate include</ENTRY>
-     <LENGTH>23</LENGTH>
+     <ENTRY>Include ZGUI_BOILERPLATE_HTML</ENTRY>
+     <LENGTH>29</LENGTH>
     </item>
    </TPOOL>
   </asx:values>
