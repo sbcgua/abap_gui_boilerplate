@@ -6,5 +6,8 @@ selection-screen end of screen 1001.
 at selection-screen on exit-command.
   perform exit.
 
+at selection-screen output.
+  perform hide_standard_buttons.
+
 include zgui_boilerplate_html.
 include zgui_boilerplate_forms.

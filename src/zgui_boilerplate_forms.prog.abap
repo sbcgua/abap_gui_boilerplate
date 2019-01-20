@@ -64,6 +64,40 @@ form remove_toolbar using pv_dynnr type char4.
 
 endform.
 
+form hide_standard_buttons.
+
+  if sy-dynnr <> '1001'.
+    return.
+  endif.
+
+  perform set_pf_status in program rsdbrunt if found.
+
+  data lt_ucomm type table of sy-ucomm.
+  append 'CRET' to lt_ucomm.  "button execute
+  append 'SPOS' to lt_ucomm.  "button save
+
+  call function 'RS_SET_SELSCREEN_STATUS'
+    exporting
+      p_status  = sy-pfkey
+    tables
+      p_exclude = lt_ucomm.
+
+endform.
+
 form boilerplate_init.
+
+  DATA: lt_ucomm TYPE TABLE OF sy-ucomm.
+
+  PERFORM set_pf_status IN PROGRAM rsdbrunt IF FOUND.
+
+  APPEND 'CRET' TO lt_ucomm.  "Button Execute
+  APPEND 'SPOS' TO lt_ucomm.  "Button Save
+
+  CALL FUNCTION 'RS_SET_SELSCREEN_STATUS'
+    EXPORTING
+      p_status  = sy-pfkey
+    TABLES
+      p_exclude = lt_ucomm.
+
   perform remove_toolbar using '1001'. " remove toolbar on html screen
 endform.
