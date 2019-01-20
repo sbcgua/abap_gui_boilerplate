@@ -1,7 +1,7 @@
 report zguibp_example.
 
 include zguibp_html.
-include zguibp_example_lib.
+include zguibp_example_common.
 include zguibp_example_component.
 
 * global router

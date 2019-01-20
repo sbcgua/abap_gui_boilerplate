@@ -1,7 +1,7 @@
 report zguibp_example_mstsh.
 
 include zguibp_html.
-include zguibp_example_lib.
+include zguibp_example_common.
 include zmustache.
 
 class lcl_mustache_component definition final.

@@ -3,7 +3,7 @@ report zguibp_example_alv.
 include zguibp_error.
 include zguibp_alv.
 include zguibp_html.
-include zguibp_example_lib.
+include zguibp_example_common.
 include zguibp_example_component.
 
 class lcl_gui_router definition final.
