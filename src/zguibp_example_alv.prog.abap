@@ -62,129 +62,48 @@ class lcl_content_view definition final inheriting from lcl_view_base.
 
     methods display redefinition.
     methods on_user_command redefinition.
-
-    methods handle_double_click
-      for event double_click of cl_salv_events_table
-      importing row column.
-
-    methods on_alv_user_command
-      for event added_function of cl_salv_events
-      importing e_salv_function.
-
-    methods on_before_salv_function
-      for event before_salv_function of cl_salv_events
-      importing e_salv_function.
-
-    methods update_data
-      importing
-        it_contents type any table.
-
-    events mock_selected exporting value(mock_name) type string.
-    events request_mock_delete exporting value(mock_name) type string.
+    methods on_double_click redefinition.
 
   private section.
-    data mr_data type ref to data.
-
-    methods acqure_content
-      importing
-        it_contents type any table.
+    methods build_toolbar
+      returning
+        value(rt_buttons) type ttb_button.
 
 endclass.
 
 class lcl_content_view implementation.
 
-  method acqure_content.
-
-    data lo_ttype type ref to cl_abap_tabledescr.
-    data lo_stype type ref to cl_abap_structdescr.
-
-    if mr_data is initial.
-      lo_ttype ?= cl_abap_typedescr=>describe_by_data( it_contents ).
-      lo_stype ?= lo_ttype->get_table_line_type( ).
-      lo_ttype = cl_abap_tabledescr=>create( lo_stype ). "ensure standard table
-      create data mr_data type handle lo_ttype.
-    endif.
-
-    field-symbols <tab> type standard table.
-    assign mr_data->* to <tab>.
-    <tab> = it_contents.
-
-  endmethod.
-
   method constructor.
     super->constructor( ).
-    acqure_content( it_contents ).
+    copy_content( it_contents ).
   endmethod.
 
   method display.
-    data lx_alv type ref to cx_salv_error.
-    field-symbols <tab> type standard table.
-    assign mr_data->* to <tab>.
 
-    try.
-      cl_salv_table=>factory(
-        importing
-          r_salv_table = mo_alv
-        changing
-          t_table      = <tab> ).
-    catch cx_salv_msg into lx_alv.
-      write / 'Error'.
-    endtry.
-
-    set_columns( mo_alv ).
-
-    data: lo_functions type ref to cl_salv_functions_list.
-    lo_functions = mo_alv->get_functions( ).
-    lo_functions->set_default( abap_true ).
-*    lo_functions->get_flavour( ).
-*    mo_alv->set_screen_status( report = sy-cprog pfstatus = 'CONTENTS_VIEW' ).
-
-    data: lo_display type ref to cl_salv_display_settings.
-    lo_display = mo_alv->get_display_settings( ).
-    lo_display->set_striped_pattern( 'X' ).
-    lo_display->set_list_header( 'My view' ).
-
-    data lo_event type ref to cl_salv_events_table.
-    lo_event = mo_alv->get_event( ).
-    set handler handle_double_click for lo_event.
-    set handler on_alv_user_command for lo_event.
-    set handler on_before_salv_function for lo_event.
-
-    data lo_sorts type ref to cl_salv_sorts.
-    lo_sorts = mo_alv->get_sorts( ).
-
-    try.
-      lo_sorts->add_sort( 'NAME' ).
-    catch cx_salv_error into lx_alv.
-      lcx_guibp_error=>raise( lx_alv->get_text( ) ).
-    endtry.
-
-    lcl_salv_enabler=>toggle_toolbar( mo_alv ).
-
+    create_alv( ).
+    set_column_tech_names( ).
+    set_default_handlers( ).
+    set_default_layout( 'My view' ).
+    set_sorting( 'NAME' ).
+    set_toolbar( build_toolbar( ) ).
     mo_alv->display( ).
-  endmethod.
 
-  method on_alv_user_command.
-    on_user_command( e_salv_function ).
   endmethod.
 
   method on_user_command.
+
     data lv_msg type string.
     lv_msg = |User asked { iv_cmd }|.
-    message lv_msg type 'S'.
+    message lv_msg type 'I'.
+
   endmethod.                    "on_user_command
 
-  method on_before_salv_function.
-    data vvv type i.
-    vvv = 1.
-  endmethod.
-
-  method handle_double_click.
+  method on_double_click.
 
     field-symbols <tab> type standard table.
     field-symbols <line> type any.
     assign mr_data->* to <tab>.
-    read table <tab> assigning <line> index row.
+    read table <tab> assigning <line> index iv_row.
 
     field-symbols <name> type string.
     assign component 'NAME' of structure <line> to <name>.
@@ -200,9 +119,33 @@ class lcl_content_view implementation.
 
   endmethod.
 
-  method update_data.
-    acqure_content( it_contents ).
-    mo_alv->refresh( ).
+  method build_toolbar.
+
+    data ls_toolbar like line of rt_buttons.
+
+    " Sort default
+    clear ls_toolbar.
+    ls_toolbar-function  = cl_gui_alv_grid=>mc_fc_sort_asc.
+    ls_toolbar-quickinfo = 'SORT'.
+    ls_toolbar-icon      = icon_sort_down.
+    ls_toolbar-disabled  = space.
+    append ls_toolbar to rt_buttons.
+
+    " toolbar seperator
+    clear ls_toolbar.
+*    ls_toolbar-function  = '&&sep01'.
+    ls_toolbar-butn_type = 3.
+    append ls_toolbar to rt_buttons.
+
+    " Custom command
+    clear ls_toolbar.
+    ls_toolbar-function  = 'ZCUSTOM'.
+    ls_toolbar-quickinfo = 'Custom command'.
+    ls_toolbar-icon      = icon_failure.
+    ls_toolbar-disabled  = space.
+    ls_toolbar-text      = 'Hello'.
+    append ls_toolbar to rt_buttons.
+
   endmethod.
 
 endclass.
