@@ -6,34 +6,9 @@ include zguibp_html.
 include zguibp_example_common.
 include zguibp_example_component.
 
-class lcl_gui_router definition final.
-  public section.
-    interfaces zif_abapgit_gui_router.
-    class-methods create
-      importing
-        iv_payload type string
-      returning
-        value(ro_router) type ref to lcl_gui_router.
-  private section.
-    data mv_payload type string.
-endclass.
-
-class lcl_gui_router implementation.
-  method create.
-    create object ro_router.
-    ro_router->mv_payload = iv_payload.
-  endmethod.
-
-  method zif_abapgit_gui_router~on_event.
-    case iv_action.
-      when zcl_abapgit_gui=>c_action-go_home.
-        ei_page  = lcl_page_hoc=>wrap(
-          iv_page_title = 'Home page'
-          ii_child      = lcl_hello_component=>create( iv_name = mv_payload ) ).
-        ev_state = zcl_abapgit_gui=>c_event_state-new_page.
-    endcase.
-  endmethod.
-endclass.
+**********************************************************************
+* html view
+**********************************************************************
 
 class lcl_html_view definition final.
   public section.
@@ -47,11 +22,17 @@ endclass.
 class lcl_html_view implementation.
   method run.
     lcl_gui_factory=>init(
-      ii_router    = lcl_gui_router=>create( iv_payload )
+      io_component = lcl_page_hoc=>wrap(
+        iv_page_title = 'Home page'
+        ii_child      = lcl_hello_component=>create( iv_name = iv_payload ) )
       ii_asset_man = lcl_common_parts=>create_asset_manager( ) ).
     lcl_gui_factory=>run( ).
   endmethod.
 endclass.
+
+**********************************************************************
+* ALV view
+**********************************************************************
 
 class lcl_content_view definition final inheriting from lcl_view_base.
   public section.
@@ -93,7 +74,7 @@ class lcl_content_view implementation.
   method on_user_command.
 
     data lv_msg type string.
-    lv_msg = |User asked { iv_cmd }|.
+    lv_msg = |User asked for: { iv_cmd }|.
     message lv_msg type 'I'.
 
   endmethod.                    "on_user_command
@@ -139,17 +120,19 @@ class lcl_content_view implementation.
 
     " Custom command
     clear ls_toolbar.
-    ls_toolbar-function  = 'ZCUSTOM'.
+    ls_toolbar-function  = 'ZHELLO'.
     ls_toolbar-quickinfo = 'Custom command'.
     ls_toolbar-icon      = icon_failure.
     ls_toolbar-disabled  = space.
-    ls_toolbar-text      = 'Hello'.
+    ls_toolbar-text      = 'Hello button'.
     append ls_toolbar to rt_buttons.
 
   endmethod.
 
 endclass.
 
+**********************************************************************
+* APP
 **********************************************************************
 
 class lcl_app definition final.
@@ -167,26 +150,29 @@ class lcl_app definition final.
       raising
         lcx_guibp_error.
 
+  private section.
     methods prepare_data
       returning value(rt_data) type tt_my_type.
+
 endclass.
 
 class lcl_app implementation.
+
   method prepare_data.
 
     field-symbols <i> like line of rt_data.
 
     append initial line to rt_data assigning <i>.
-    <i>-name = 'Vasya'.
-    <i>-year = '2014'.
+    <i>-name   = 'Vasya'.
+    <i>-year   = '2014'.
     <i>-amount = '1234.10'.
     append initial line to rt_data assigning <i>.
-    <i>-name = 'Grysha'.
-    <i>-year = '2008'.
+    <i>-name   = 'Grysha'.
+    <i>-year   = '2008'.
     <i>-amount = '10234.10'.
     append initial line to rt_data assigning <i>.
-    <i>-name = 'Kostya'.
-    <i>-year = '1999'.
+    <i>-name   = 'Kostya'.
+    <i>-year   = '1999'.
     <i>-amount = '80034.10'.
 
   endmethod.
@@ -196,6 +182,7 @@ class lcl_app implementation.
     create object lo_alv exporting it_contents = prepare_data( ).
     lo_alv->display( ).
   endmethod.
+
 endclass.
 
 include zguibp_example_run.

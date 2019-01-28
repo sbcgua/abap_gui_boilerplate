@@ -5,7 +5,7 @@ class lcl_page_hoc definition final.
     class-methods wrap
       importing
         iv_page_title      type string
-        ii_child           type ref to zif_abapgit_gui_page
+        ii_child           type ref to zif_abapgit_gui_renderable
         iv_show_debug_div  type abap_bool default abap_false
         iv_before_body_end type string optional
         iv_add_styles      type any optional
@@ -14,7 +14,7 @@ class lcl_page_hoc definition final.
 
   private section.
     data mv_page_title      type string.
-    data mi_child           type ref to zif_abapgit_gui_page.
+    data mi_child           type ref to zif_abapgit_gui_renderable.
     data mv_show_debug_div  type abap_bool.
     data mv_before_body_end type string.
     data mt_add_styles      type string_table.
@@ -62,7 +62,15 @@ class lcl_page_hoc implementation.
 
   method zif_abapgit_gui_page~on_event.
 
-    mi_child->on_event(
+    data li_page_eh type ref to zif_abapgit_gui_event_handler.
+
+    try.
+      li_page_eh ?= mi_child.
+      catch cx_sy_move_cast_error.
+        return.
+    endtry.
+
+    li_page_eh->on_event(
       EXPORTING
         iv_action    = iv_action
         iv_prev_page = iv_prev_page
@@ -113,7 +121,7 @@ class lcl_gui_factory definition final create private.
   public section.
     class-methods init
       importing
-        ii_router                   type ref to zif_abapgit_gui_router
+        io_component                type ref to object
         ii_asset_man                type ref to zif_abapgit_gui_asset_manager
         iv_no_default_error_handler type abap_bool default abap_false
       raising
@@ -129,13 +137,13 @@ class lcl_gui_factory definition final create private.
         value(ri_asset_man) type ref to zif_abapgit_gui_asset_manager.
     class-methods get_router
       returning
-        value(ri_router) type ref to zif_abapgit_gui_router.
+        value(ro_router) type ref to object.
     class-methods get_gui
       returning
         value(ro_gui) type ref to zcl_abapgit_gui.
 
   private section.
-    class-data gi_router type ref to zif_abapgit_gui_router.
+    class-data go_router type ref to object.
     class-data gi_asset_man type ref to zif_abapgit_gui_asset_manager.
     class-data go_gui_instance type ref to zcl_abapgit_gui.
 endclass.
@@ -146,7 +154,7 @@ class lcl_gui_factory implementation.
   endmethod.
 
   method get_router.
-    ri_router = gi_router.
+    ro_router = go_router.
   endmethod.
 
   method get_gui.
@@ -162,12 +170,16 @@ class lcl_gui_factory implementation.
     endif.
 
     gi_asset_man = ii_asset_man.
-    gi_router    = ii_router.
+
+    if zcl_abapgit_gui=>is_renderable( io_component ) = abap_false
+      and zcl_abapgit_gui=>is_event_handler( io_component ) = abap_true.
+      go_router ?= io_component.
+    endif.
 
     try .
       create object go_gui_instance
         exporting
-          ii_router    = ii_router
+          io_component = io_component
           ii_asset_man = ii_asset_man.
     catch zcx_abapgit_exception into lx.
       lcx_guibp_error=>raise( lx->get_text( ) ).
@@ -199,6 +211,6 @@ class lcl_gui_factory implementation.
     go_gui_instance->free( ).
     clear go_gui_instance.
     clear gi_asset_man.
-    clear gi_router.
+    clear go_router.
   endmethod.
 endclass.

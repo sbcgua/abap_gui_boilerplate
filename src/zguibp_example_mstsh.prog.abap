@@ -7,49 +7,54 @@ include zmustache.
 
 class lcl_mustache_component definition final.
   public section.
-    interfaces zif_abapgit_gui_page.
+    interfaces zif_abapgit_gui_renderable.
+    class-methods create
+      returning
+        value(ro_component) type ref to lcl_mustache_component.
+
+  private section.
+    methods build_data
+      returning
+        value(ro_data) type ref to lcl_mustache_data.
+endclass.
+
+class lcl_mustache_component implementation.
+
+  method build_data. " Create some dummy data
 
     types:
       begin of ty_tab,
         name type string,
         value type string,
-      end of ty_tab,
-      tt_tab type standard table of ty_tab with key name.
+      end of ty_tab.
 
-    class-methods create
-      returning
-        value(ro_component) type ref to lcl_mustache_component.
-  private section.
-
-endclass.
-
-class lcl_mustache_component implementation.
-
-  method zif_abapgit_gui_page~render.
-
-    data lo_asset_man type ref to zif_abapgit_gui_asset_manager.
-    lo_asset_man ?= lcl_gui_factory=>get_asset_man( ).
-
-    create object ro_html type zcl_abapgit_html.
-
-    data lv_template type string.
-    data lv_out type string.
-    lv_template = lo_asset_man->get_text_asset( 'templates/table.mustache' ).
-
-    data lt_tab type tt_tab.
+    data lt_tab type table of ty_tab.
     field-symbols <i> like line of lt_tab.
 
     append initial line to lt_tab assigning <i>.
-    <i>-name = 'Some'.
+    <i>-name  = 'Some'.
     <i>-value = 'Data'.
     append initial line to lt_tab assigning <i>.
-    <i>-name = 'In'.
+    <i>-name  = 'In'.
     <i>-value = 'Table'.
 
+    create object ro_data.
+    ro_data->add( iv_name = 'username' iv_val = sy-uname ).
+    ro_data->add( iv_name = 'items'    iv_val = lt_tab ).
+
+  endmethod.
+
+  method zif_abapgit_gui_renderable~render.
+
+    data lo_asset_man type ref to zif_abapgit_gui_asset_manager.
+    data lv_template type string.
+    data lv_out type string.
     data lo_data type ref to lcl_mustache_data.
-    create object lo_data.
-    lo_data->add( iv_name = 'username' iv_val = sy-uname ).
-    lo_data->add( iv_name = 'items'    iv_val = lt_tab ).
+
+    lo_asset_man ?= lcl_gui_factory=>get_asset_man( ).
+    lv_template   = lo_asset_man->get_text_asset( 'templates/table.mustache' ).
+    lo_data       = build_data( ).
+    create object ro_html type zcl_abapgit_html.
 
     try .
       data lo_mustache type ref to lcl_mustache.
@@ -63,38 +68,15 @@ class lcl_mustache_component implementation.
 
   endmethod.
 
-  method zif_abapgit_gui_page~on_event.
-  endmethod.
-
   method create.
     create object ro_component.
   endmethod.
 
 endclass.
 
-class lcl_gui_router definition final.
-  public section.
-    interfaces zif_abapgit_gui_router.
-    class-methods create
-      returning
-        value(ro_router) type ref to lcl_gui_router.
-endclass.
-
-class lcl_gui_router implementation.
-  method create.
-    create object ro_router.
-  endmethod.
-  method zif_abapgit_gui_router~on_event.
-    case iv_action.
-      when zcl_abapgit_gui=>c_action-go_home.
-        ei_page  = lcl_page_hoc=>wrap(
-          iv_add_styles = 'css/example.css'
-          iv_page_title = 'Mustache page'
-          ii_child      = lcl_mustache_component=>create( ) ).
-        ev_state = zcl_abapgit_gui=>c_event_state-new_page.
-    endcase.
-  endmethod.
-endclass.
+**********************************************************************
+* APP
+**********************************************************************
 
 class lcl_app definition final.
   public section.
@@ -105,8 +87,13 @@ endclass.
 
 class lcl_app implementation.
   method run.
+    data li_page type ref to zif_abapgit_gui_renderable.
+    li_page ?= lcl_page_hoc=>wrap(
+      iv_add_styles = 'css/example.css'
+      iv_page_title = 'Mustache page'
+      ii_child      = lcl_mustache_component=>create( ) ).
     lcl_gui_factory=>init(
-      ii_router    = lcl_gui_router=>create( )
+      io_component = li_page
       ii_asset_man = lcl_common_parts=>create_asset_manager( ) ).
     lcl_gui_factory=>run( ).
   endmethod.

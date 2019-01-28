@@ -5,6 +5,7 @@
 " Changes:
 " - gui-on_error
 " - html interface
+" - gui accepts router or page: renderable / event_handler interfaces
 
 * EXCEPTION
 
@@ -233,16 +234,7 @@ INTERFACE zif_abapgit_gui_asset_manager .
 
 ENDINTERFACE.
 
-INTERFACE zif_abapgit_gui_page .
-
-  METHODS on_event
-    IMPORTING iv_action    TYPE clike
-              iv_prev_page TYPE clike
-              iv_getdata   TYPE clike OPTIONAL
-              it_postdata  TYPE cnht_post_data_tab OPTIONAL
-    EXPORTING ei_page      TYPE REF TO zif_abapgit_gui_page
-              ev_state     TYPE i
-    RAISING   zcx_abapgit_exception zcx_abapgit_cancel.
+INTERFACE zif_abapgit_gui_renderable .
 
   METHODS render
     RETURNING VALUE(ro_html) TYPE REF TO zif_abapgit_html
@@ -250,7 +242,7 @@ INTERFACE zif_abapgit_gui_page .
 
 ENDINTERFACE.
 
-INTERFACE zif_abapgit_gui_router .
+INTERFACE zif_abapgit_gui_event_handler .
 
   METHODS on_event
     IMPORTING
@@ -259,11 +251,21 @@ INTERFACE zif_abapgit_gui_router .
       iv_getdata   TYPE clike OPTIONAL
       it_postdata  TYPE cnht_post_data_tab OPTIONAL
     EXPORTING
-      ei_page      TYPE REF TO zif_abapgit_gui_page
+      ei_page      TYPE REF TO zif_abapgit_gui_renderable
       ev_state     TYPE i
     RAISING
       zcx_abapgit_exception
       zcx_abapgit_cancel.
+
+ENDINTERFACE.
+
+
+INTERFACE zif_abapgit_gui_page .
+
+  INTERFACES zif_abapgit_gui_event_handler.
+  INTERFACES zif_abapgit_gui_renderable.
+  ALIASES on_event FOR zif_abapgit_gui_event_handler~on_event.
+  ALIASES render FOR zif_abapgit_gui_renderable~render.
 
 ENDINTERFACE.
 
@@ -908,12 +910,24 @@ CLASS zcl_abapgit_gui DEFINITION FINAL .
 
     METHODS constructor
       IMPORTING
-        ii_router    TYPE REF TO zif_abapgit_gui_router
+        io_component TYPE REF TO object
         ii_asset_man TYPE REF TO zif_abapgit_gui_asset_manager
       RAISING
         zcx_abapgit_exception.
 
     METHODS free.
+
+    CLASS-METHODS is_renderable
+      IMPORTING
+        io_obj TYPE REF TO object
+      RETURNING
+        VALUE(rv_yes) TYPE abap_bool.
+
+    CLASS-METHODS is_event_handler
+      IMPORTING
+        io_obj TYPE REF TO object
+      RETURNING
+        VALUE(rv_yes) TYPE abap_bool.
 
     EVENTS on_error
       EXPORTING
@@ -924,13 +938,13 @@ CLASS zcl_abapgit_gui DEFINITION FINAL .
 
     TYPES:
       BEGIN OF ty_page_stack,
-        page     TYPE REF TO zif_abapgit_gui_page,
+        page     TYPE REF TO zif_abapgit_gui_renderable,
         bookmark TYPE abap_bool,
       END OF ty_page_stack.
 
-    DATA: mi_cur_page    TYPE REF TO zif_abapgit_gui_page,
+    DATA: mi_cur_page    TYPE REF TO zif_abapgit_gui_renderable,
           mt_stack       TYPE STANDARD TABLE OF ty_page_stack,
-          mi_router      TYPE REF TO zif_abapgit_gui_router,
+          mi_router      TYPE REF TO zif_abapgit_gui_event_handler,
           mi_asset_man   TYPE REF TO zif_abapgit_gui_asset_manager,
           mo_html_viewer TYPE REF TO cl_gui_html_viewer.
 
@@ -964,7 +978,7 @@ CLASS zcl_abapgit_gui DEFINITION FINAL .
 
     METHODS call_page
       IMPORTING
-        ii_page          TYPE REF TO zif_abapgit_gui_page
+        ii_page          TYPE REF TO zif_abapgit_gui_renderable
         iv_with_bookmark TYPE abap_bool DEFAULT abap_false
         iv_replacing     TYPE abap_bool DEFAULT abap_false
       RAISING
@@ -1055,9 +1069,10 @@ CLASS ZCL_ABAPGIT_GUI IMPLEMENTATION.
 
   METHOD cache_html.
 
-    rv_url = cache_asset( iv_text    = iv_text
-                          iv_type    = 'text'
-                          iv_subtype = 'html' ).
+    rv_url = cache_asset(
+      iv_text    = iv_text
+      iv_type    = 'text'
+      iv_subtype = 'html' ).
 
   ENDMETHOD.
 
@@ -1077,10 +1092,36 @@ CLASS ZCL_ABAPGIT_GUI IMPLEMENTATION.
 
   ENDMETHOD.
 
+  METHOD is_renderable.
+    DATA li_renderable TYPE REF TO zif_abapgit_gui_renderable.
+    TRY.
+        li_renderable ?= io_obj.
+        rv_yes = abap_true.
+      CATCH cx_sy_move_cast_error ##NO_HANDLER.
+    ENDTRY.
+  ENDMETHOD.
+
+  METHOD is_event_handler.
+    DATA li_event_handler TYPE REF TO zif_abapgit_gui_event_handler.
+    TRY.
+        li_event_handler ?= io_obj.
+        rv_yes = abap_true.
+      CATCH cx_sy_move_cast_error ##NO_HANDLER.
+    ENDTRY.
+  ENDMETHOD.
+
 
   METHOD constructor.
 
-    mi_router    = ii_router.
+    IF is_renderable( io_component ) = abap_true.
+      mi_cur_page ?= io_component. " direct page
+    ELSE.
+      IF is_event_handler( io_component ) = abap_false.
+        zcx_abapgit_exception=>raise( 'Component must be renderable or be an event handler' ).
+      ENDIF.
+      mi_router ?= io_component.
+    ENDIF.
+
     mi_asset_man = ii_asset_man.
     startup( ).
 
@@ -1098,6 +1139,7 @@ CLASS ZCL_ABAPGIT_GUI IMPLEMENTATION.
 
 
   METHOD get_current_page_name.
+
     IF mi_cur_page IS BOUND.
       rv_page_name = cl_abap_classdescr=>describe_by_object_ref( mi_cur_page )->get_relative_name( ).
     ENDIF." ELSE - return is empty => initial page
@@ -1107,7 +1149,17 @@ CLASS ZCL_ABAPGIT_GUI IMPLEMENTATION.
 
   METHOD go_home.
 
-    on_event( action = |{ c_action-go_home }| ). " doesn't accept strings directly
+    DATA ls_stack LIKE LINE OF mt_stack.
+
+    IF mi_router IS BOUND.
+      on_event( action = |{ c_action-go_home }| ). " doesn't accept strings directly
+    ELSE.
+      IF lines( mt_stack ) > 0.
+        READ TABLE mt_stack INTO ls_stack INDEX 1.
+        mi_cur_page = ls_stack-page.
+      ENDIF.
+      render( ).
+    ENDIF.
 
   ENDMETHOD.
 
@@ -1115,12 +1167,16 @@ CLASS ZCL_ABAPGIT_GUI IMPLEMENTATION.
   METHOD handle_action.
 
     DATA: lx_exception TYPE REF TO zcx_abapgit_exception,
-          li_page      TYPE REF TO zif_abapgit_gui_page,
+          li_page_eh   TYPE REF TO zif_abapgit_gui_event_handler,
+          li_page      TYPE REF TO zif_abapgit_gui_renderable,
           lv_state     TYPE i.
 
     TRY.
-        IF mi_cur_page IS BOUND.
-          mi_cur_page->on_event(
+        " Home must be processed by router if it is there
+        IF ( iv_action <> c_action-go_home OR mi_router IS NOT BOUND )
+          AND mi_cur_page IS BOUND AND is_event_handler( mi_cur_page ) = abap_true.
+          li_page_eh ?= mi_cur_page.
+          li_page_eh->on_event(
             EXPORTING
               iv_action    = iv_action
               iv_prev_page = get_current_page_name( )
@@ -1131,7 +1187,7 @@ CLASS ZCL_ABAPGIT_GUI IMPLEMENTATION.
               ev_state     = lv_state ).
         ENDIF.
 
-        IF lv_state IS INITIAL.
+        IF lv_state IS INITIAL AND mi_router IS BOUND.
           mi_router->on_event(
             EXPORTING
               iv_action    = iv_action
