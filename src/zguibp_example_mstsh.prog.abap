@@ -3,7 +3,6 @@ report zguibp_example_mstsh.
 include zguibp_error.
 include zguibp_html.
 include zguibp_example_common.
-include zmustache.
 
 class lcl_mustache_component definition final.
   public section.
@@ -15,7 +14,7 @@ class lcl_mustache_component definition final.
   private section.
     methods build_data
       returning
-        value(ro_data) type ref to lcl_mustache_data.
+        value(ro_data) type ref to zcl_mustache_data.
 endclass.
 
 class lcl_mustache_component implementation.
@@ -49,7 +48,7 @@ class lcl_mustache_component implementation.
     data lo_asset_man type ref to zif_abapgit_gui_asset_manager.
     data lv_template type string.
     data lv_out type string.
-    data lo_data type ref to lcl_mustache_data.
+    data lo_data type ref to zcl_mustache_data.
 
     lo_asset_man ?= lcl_gui_factory=>get_asset_man( ).
     lv_template   = lo_asset_man->get_text_asset( 'templates/table.mustache' ).
@@ -57,10 +56,10 @@ class lcl_mustache_component implementation.
     create object ro_html type zcl_abapgit_html.
 
     try .
-      data lo_mustache type ref to lcl_mustache.
-      lo_mustache = lcl_mustache=>create( lv_template ).
+      data lo_mustache type ref to zcl_mustache.
+      lo_mustache = zcl_mustache=>create( lv_template ).
       lv_out = lo_mustache->render( lo_data->get( ) ).
-    catch lcx_mustache_error.
+    catch zcx_mustache_error.
       zcx_abapgit_exception=>raise( 'Error rendering table component' ).
     endtry.
 
@@ -87,6 +86,11 @@ endclass.
 
 class lcl_app implementation.
   method run.
+    if zcl_mustache=>check_version_fits( 'v2.0.0' ) = abap_false.
+      write: / 'Please update mustache library the version is too low.'.
+      return.
+    endif.
+
     data li_page type ref to zif_abapgit_gui_renderable.
     li_page ?= lcl_page_hoc=>wrap(
       iv_add_styles = 'css/example.css'
