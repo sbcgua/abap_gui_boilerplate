@@ -22,7 +22,7 @@ The examples have some common components:
 
 Also, ALV ! How could it be without ALV ?! ;)
 
-- `ZGUIBP_ALV` - implement a common base class for SALV with controllable toolbar (based on zevolving blogs). Well, may be of interest, though I guess everybody has ALV boilerplates of his own ...
+- `ZGUIBP_ALV` - implements a common base class for SALV with controllable toolbar (based on zevolving blogs). Well, may be of interest, though I guess everybody has ALV boilerplates of his own ...
 
 ## Shortly the concept of HTML UI classes
 
@@ -40,7 +40,6 @@ Quick pseudo code for implementation
     method render.
       ro_html = new zcl_abapgit_html.
       ro_html->add( 'some html stuff, in-body only' ).
-      return 
     endmethod.
   endclass.
 
