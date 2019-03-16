@@ -121,14 +121,16 @@ class lcl_gui_factory definition final create private.
   public section.
     class-methods init
       importing
-        io_component                type ref to object
-        ii_asset_man                type ref to zif_abapgit_gui_asset_manager
+        io_component                type ref to object optional
+        ii_asset_man                type ref to zif_abapgit_gui_asset_manager optional
         iv_no_default_error_handler type abap_bool default abap_false
       raising
         lcx_guibp_error.
 
     class-methods free.
     class-methods run
+      importing
+        io_page type ref to zif_abapgit_gui_renderable optional
       raising
         lcx_guibp_error.
 
@@ -171,7 +173,7 @@ class lcl_gui_factory implementation.
 
     gi_asset_man = ii_asset_man.
 
-    if zcl_abapgit_gui=>is_renderable( io_component ) = abap_false
+    if io_component is bound and zcl_abapgit_gui=>is_renderable( io_component ) = abap_false
       and zcl_abapgit_gui=>is_event_handler( io_component ) = abap_true.
       go_router ?= io_component.
     endif.
@@ -198,7 +200,11 @@ class lcl_gui_factory implementation.
     data lx type ref to zcx_abapgit_exception.
 
     try .
-      go_gui_instance->go_home( ).
+      if io_page is bound.
+        go_gui_instance->go_page( io_page ).
+      else.
+        go_gui_instance->go_home( ).
+      endif.
       call selection-screen 1001. " trigger screen
       free( ).
     catch zcx_abapgit_exception into lx.

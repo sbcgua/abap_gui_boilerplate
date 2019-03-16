@@ -9,6 +9,8 @@ body {
   overflow-x:  hidden;
 }
 
+table { border-collapse: collapse; }
+
 a, a:visited {
   color:            #4078c0;
   text-decoration:  none;
@@ -43,6 +45,7 @@ a:hover, a:active {
 .wmin             { width: 1%; }
 .float-right      { float: right; }
 .inline           { display: inline; }
+.hidden           { visibility: hidden; }
 
 .pad-05           { padding: 0.5em 0.5em; }
 .pad-4px          { padding: 4px; }

@@ -299,27 +299,32 @@ class lcl_view_base implementation.
 
   method set_sorting.
 
-    data lx_alv type ref to cx_salv_error.
-    data lo_sorts type ref to cl_salv_sorts.
+    data lx_alv    type ref to cx_salv_error.
+    data lo_sorts  type ref to cl_salv_sorts.
+    data lt_fields type string_table.
+    data lv_ftype  type c.
+    data lv_fld    type string.
+    field-symbols <sorts> type string_table.
+
+    describe field iv_fields type lv_ftype.
     lo_sorts = mo_alv->get_sorts( ).
 
-    data lv_ftype type c.
-    describe field iv_fields type lv_ftype.
-
-    field-symbols <sorts> type string_table.
-    field-symbols <s> type string.
     try.
-
-      if lv_ftype ca 'Cg'. " Value, assime char like
-        lo_sorts->add_sort( iv_fields ).
+      if lv_ftype ca 'Cg'. " Value, assume char like
+        split iv_fields at ',' into table lt_fields.
+        assign lt_fields to <sorts>.
       elseif lv_ftype = 'h'. " Table, assume string table
         assign iv_fields to <sorts>.
-        loop at <sorts> assigning <s>.
-          lo_sorts->add_sort( |{ <s> }| ).
-        endloop.
       else.
         lcx_guibp_error=>raise( 'Wrong sorting parameter' ).
       endif.
+
+      loop at <sorts> into lv_fld.
+        lv_fld = to_upper( lv_fld ).
+        condense lv_fld.
+        check lv_fld is not initial.
+        lo_sorts->add_sort( |{ lv_fld }| ).
+      endloop.
     catch cx_salv_error into lx_alv.
       lcx_guibp_error=>raise( lx_alv->get_text( ) ).
     endtry.

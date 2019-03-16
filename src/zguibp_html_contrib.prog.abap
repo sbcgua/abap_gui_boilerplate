@@ -6,6 +6,7 @@
 " - gui-on_error
 " - html interface
 " - gui accepts router or page: renderable / event_handler interfaces
+" - gui accept no component at construction, direct open page method
 
 * EXCEPTION
 
@@ -892,6 +893,13 @@ CLASS zcl_abapgit_gui DEFINITION FINAL .
       RAISING
         zcx_abapgit_exception.
 
+    METHODS go_page
+      IMPORTING
+        io_page TYPE REF TO zif_abapgit_gui_renderable
+        iv_clear_stack TYPE abap_bool DEFAULT abap_true
+      RAISING
+        zcx_abapgit_exception.
+
     METHODS back
       IMPORTING
         iv_to_bookmark TYPE abap_bool DEFAULT abap_false
@@ -910,8 +918,8 @@ CLASS zcl_abapgit_gui DEFINITION FINAL .
 
     METHODS constructor
       IMPORTING
-        io_component TYPE REF TO object
-        ii_asset_man TYPE REF TO zif_abapgit_gui_asset_manager
+        ii_asset_man TYPE REF TO zif_abapgit_gui_asset_manager OPTIONAL
+        io_component TYPE REF TO object OPTIONAL
       RAISING
         zcx_abapgit_exception.
 
@@ -1113,13 +1121,15 @@ CLASS ZCL_ABAPGIT_GUI IMPLEMENTATION.
 
   METHOD constructor.
 
-    IF is_renderable( io_component ) = abap_true.
-      mi_cur_page ?= io_component. " direct page
-    ELSE.
-      IF is_event_handler( io_component ) = abap_false.
-        zcx_abapgit_exception=>raise( 'Component must be renderable or be an event handler' ).
+    IF io_component IS BOUND.
+      IF is_renderable( io_component ) = abap_true.
+        mi_cur_page ?= io_component. " direct page
+      ELSE.
+        IF is_event_handler( io_component ) = abap_false.
+          zcx_abapgit_exception=>raise( 'Component must be renderable or be an event handler' ).
+        ENDIF.
+        mi_router ?= io_component.
       ENDIF.
-      mi_router ?= io_component.
     ENDIF.
 
     mi_asset_man = ii_asset_man.
@@ -1160,6 +1170,17 @@ CLASS ZCL_ABAPGIT_GUI IMPLEMENTATION.
       ENDIF.
       render( ).
     ENDIF.
+
+  ENDMETHOD.
+
+  METHOD go_page.
+
+    IF iv_clear_stack = abap_true.
+      CLEAR mt_stack.
+    ENDIF.
+
+    mi_cur_page = io_page.
+    render( ).
 
   ENDMETHOD.
 
@@ -1244,6 +1265,10 @@ CLASS ZCL_ABAPGIT_GUI IMPLEMENTATION.
     DATA: lv_url  TYPE w3url,
           li_html TYPE REF TO zif_abapgit_html.
 
+    IF mi_cur_page IS NOT BOUND.
+      zcx_abapgit_exception=>raise( 'GUI error: no current page' ).
+    ENDIF.
+
     li_html = mi_cur_page->render( ).
     lv_url  = cache_html( li_html->render( iv_no_indent_jscss = abap_true ) ).
 
@@ -1265,13 +1290,15 @@ CLASS ZCL_ABAPGIT_GUI IMPLEMENTATION.
         query_table_disabled = abap_true
         parent               = cl_gui_container=>screen0.
 
-    lt_assets = mi_asset_man->get_all_assets( ).
-    LOOP AT lt_assets ASSIGNING <ls_asset> WHERE is_cacheable = abap_true.
-      cache_asset( iv_xdata   = <ls_asset>-content
-                   iv_url     = <ls_asset>-url
-                   iv_type    = <ls_asset>-type
-                   iv_subtype = <ls_asset>-subtype ).
-    ENDLOOP.
+    IF mi_asset_man IS BOUND.
+      lt_assets = mi_asset_man->get_all_assets( ).
+      LOOP AT lt_assets ASSIGNING <ls_asset> WHERE is_cacheable = abap_true.
+        cache_asset( iv_xdata   = <ls_asset>-content
+                     iv_url     = <ls_asset>-url
+                     iv_type    = <ls_asset>-type
+                     iv_subtype = <ls_asset>-subtype ).
+      ENDLOOP.
+    ENDIF.
 
     ls_event-eventid    = mo_html_viewer->m_id_sapevent.
     ls_event-appl_event = abap_true.

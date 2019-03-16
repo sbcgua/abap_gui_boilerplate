@@ -9,13 +9,13 @@
      <RELID>MI</RELID>
      <OBJID>ZGUIBP_CSS_COMMON</OBJID>
      <NAME>fileextension</NAME>
-     <VALUE>.css</VALUE>
+     <VALUE>.CSS</VALUE>
     </WWWPARAMS>
     <WWWPARAMS>
      <RELID>MI</RELID>
      <OBJID>ZGUIBP_CSS_COMMON</OBJID>
      <NAME>filename</NAME>
-     <VALUE>gui-boilerplate.css</VALUE>
+     <VALUE>COMMON.CSS</VALUE>
     </WWWPARAMS>
     <WWWPARAMS>
      <RELID>MI</RELID>
