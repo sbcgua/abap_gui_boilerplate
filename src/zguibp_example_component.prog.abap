@@ -50,7 +50,7 @@ class lcl_hello_component implementation.
       ro_html->add( |<div>{ ro_html->a(
         iv_txt = 'Go to another page'
         iv_act = mv_link
-        iv_typ = zif_abapgit_definitions=>c_action_type-sapevent
+        iv_typ = zif_abapgit_html=>c_action_type-sapevent
       ) }</div>| ).
     endif.
 

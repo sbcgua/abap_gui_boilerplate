@@ -14,7 +14,7 @@ class lcl_mustache_component definition final.
   private section.
     methods build_data
       returning
-        value(ro_data) type ref to zcl_mustache_data.
+        value(ro_data) type ref to object. "ref to zcl_mustache_data.
 endclass.
 
 class lcl_mustache_component implementation.
@@ -37,9 +37,18 @@ class lcl_mustache_component implementation.
     <i>-name  = 'In'.
     <i>-value = 'Table'.
 
-    create object ro_data.
-    ro_data->add( iv_name = 'username' iv_val = sy-uname ).
-    ro_data->add( iv_name = 'items'    iv_val = lt_tab ).
+    create object ro_data type ('ZCL_MUSTACHE_DATA').
+    call method ro_data->('ADD')
+      exporting
+        iv_name = 'username'
+        iv_val  = sy-uname.
+    call method ro_data->('ADD')
+      exporting
+        iv_name = 'items'
+        iv_val  = lt_tab.
+
+*    ro_data->add( iv_name = 'username' iv_val = sy-uname ).
+*    ro_data->add( iv_name = 'items'    iv_val = lt_tab ).
 
   endmethod.
 
@@ -48,7 +57,7 @@ class lcl_mustache_component implementation.
     data lo_asset_man type ref to zif_abapgit_gui_asset_manager.
     data lv_template type string.
     data lv_out type string.
-    data lo_data type ref to zcl_mustache_data.
+    data lo_data type ref to object. " ref to zcl_mustache_data.
 
     lo_asset_man ?= lcl_gui_factory=>get_asset_man( ).
     lv_template   = lo_asset_man->get_text_asset( 'templates/table.mustache' ).
@@ -56,10 +65,24 @@ class lcl_mustache_component implementation.
     create object ro_html type zcl_abapgit_html.
 
     try .
-      data lo_mustache type ref to zcl_mustache.
-      lo_mustache = zcl_mustache=>create( lv_template ).
-      lv_out = lo_mustache->render( lo_data->get( ) ).
-    catch zcx_mustache_error.
+      data lo_mustache type ref to object. " ref to zcl_mustache.
+
+      call method ('ZCL_MUSTACHE')=>('CREATE')
+        exporting
+          iv_template = lv_template
+        receiving
+          ro_instance = lo_mustache.
+
+*      lo_mustache = zcl_mustache=>create( lv_template ).
+
+      call method lo_mustache->('RENDER')
+        exporting
+          i_data = lo_data
+        receiving
+          rv_text = lv_out.
+
+*      lv_out = lo_mustache->render( lo_data->get( ) ).
+    catch cx_static_check. " zcx_mustache_error.
       zcx_abapgit_exception=>raise( 'Error rendering table component' ).
     endtry.
 
@@ -86,7 +109,16 @@ endclass.
 
 class lcl_app implementation.
   method run.
-    if zcl_mustache=>check_version_fits( 'v2.0.0' ) = abap_false.
+    data lv_version_fits type abap_bool.
+
+    call method ('ZCL_MUSTACHE')=>('CHECK_VERSION_FITS')
+      exporting
+        i_required_version = 'v2.0.0'
+      receiving
+        r_fits = lv_version_fits.
+
+*    if zcl_mustache=>check_version_fits( 'v2.0.0' ) = abap_false.
+    if lv_version_fits = abap_false.
       write: / 'Please update mustache library the version is too low.'.
       return.
     endif.

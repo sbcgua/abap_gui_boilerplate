@@ -36,7 +36,7 @@ class lcl_gui_router implementation.
         ei_page ?= lcl_page_hoc=>wrap(
           iv_page_title = 'Page 2'
           ii_child      = lcl_hello_component=>create( iv_name = 'Page 2' ) ).
-        ev_state = zif_abapgit_definitions=>c_event_state-new_page.
+        ev_state = zcl_abapgit_gui=>c_event_state-new_page.
     endcase.
   endmethod.
 endclass.
