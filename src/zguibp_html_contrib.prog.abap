@@ -785,7 +785,7 @@ CLASS ZCL_ABAPGIT_GUI_ASSET_MANAGER IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    rv_xdata = zcl_abapgit_string_utils=>bintab_to_xstring(
+    rv_xdata = zcl_abapgit_convert=>bintab_to_xstring(
       iv_size   = lv_size
       it_bintab = lt_w3mime ).
 
@@ -815,9 +815,9 @@ CLASS ZCL_ABAPGIT_GUI_ASSET_MANAGER IMPLEMENTATION.
     ls_asset-mime_name    = iv_mime_name.
     ls_asset-is_cacheable = iv_cachable.
     IF iv_base64 IS NOT INITIAL.
-      ls_asset-content = zcl_abapgit_string_utils=>base64_to_xstring( iv_base64 ).
+      ls_asset-content = zcl_abapgit_convert=>base64_to_xstring( iv_base64 ).
     ELSEIF iv_inline IS NOT INITIAL.
-      ls_asset-content = zcl_abapgit_string_utils=>string_to_xstring( iv_inline ).
+      ls_asset-content = zcl_abapgit_convert=>string_to_xstring( iv_inline ).
     ENDIF.
 
     APPEND ls_asset TO mt_asset_register.
@@ -1045,12 +1045,12 @@ CLASS ZCL_ABAPGIT_GUI IMPLEMENTATION.
     ASSERT iv_text IS SUPPLIED OR iv_xdata IS SUPPLIED.
 
     IF iv_text IS SUPPLIED. " String input
-      lv_xstr = zcl_abapgit_string_utils=>string_to_xstring( iv_text ).
+      lv_xstr = zcl_abapgit_convert=>string_to_xstring( iv_text ).
     ELSE. " Raw input
       lv_xstr = iv_xdata.
     ENDIF.
 
-    zcl_abapgit_string_utils=>xstring_to_bintab(
+    zcl_abapgit_convert=>xstring_to_bintab(
       EXPORTING
         iv_xstr   = lv_xstr
       IMPORTING
