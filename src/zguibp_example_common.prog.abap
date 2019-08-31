@@ -36,6 +36,15 @@ class lcl_common_parts implementation.
       iv_inline    = concat_lines_of( table = lt_inline sep = cl_abap_char_utilities=>newline ) ).
 
     clear lt_inline.
+    " @@abapmerge include zgui_boilerplate_js_preact.w3mi.data.js > _inline '$$'.
+    ro_asset_man->register_asset(
+      iv_url       = 'lib/index.js'
+      iv_type      = 'text/javascript'
+*      iv_cachable  = abap_false
+      iv_mime_name = 'ZGUIBP_JS_PREACT'
+      iv_inline    = concat_lines_of( table = lt_inline sep = cl_abap_char_utilities=>newline ) ).
+
+    clear lt_inline.
     " @@abapmerge include zgui_boilerplate_css_common.w3mi.data.css > _inline '$$'.
     ro_asset_man->register_asset(
       iv_url       = 'css/example.css'
