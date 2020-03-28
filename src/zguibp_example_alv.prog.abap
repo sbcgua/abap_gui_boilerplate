@@ -67,6 +67,13 @@ class lcl_content_view implementation.
     set_default_layout( 'My view' ).
     set_sorting( 'NAME' ).
     set_toolbar( build_toolbar( ) ).
+
+    mo_alv->set_screen_popup(
+      start_column = 1
+      end_column   = 100
+      start_line   = 1
+      end_line     = 20 ).
+
     mo_alv->display( ).
 
   endmethod.
