@@ -6,20 +6,14 @@
    <TEXT>Common CSS for GUI boilerplate</TEXT>
    <PARAMS>
     <WWWPARAMS>
-     <RELID>MI</RELID>
-     <OBJID>ZGUIBP_CSS_COMMON</OBJID>
      <NAME>fileextension</NAME>
      <VALUE>.CSS</VALUE>
     </WWWPARAMS>
     <WWWPARAMS>
-     <RELID>MI</RELID>
-     <OBJID>ZGUIBP_CSS_COMMON</OBJID>
      <NAME>filename</NAME>
      <VALUE>COMMON.CSS</VALUE>
     </WWWPARAMS>
     <WWWPARAMS>
-     <RELID>MI</RELID>
-     <OBJID>ZGUIBP_CSS_COMMON</OBJID>
      <NAME>mimetype</NAME>
      <VALUE>text/css</VALUE>
     </WWWPARAMS>

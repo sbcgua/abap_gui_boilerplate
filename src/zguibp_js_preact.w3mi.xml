@@ -6,20 +6,14 @@
    <TEXT>Preact script for GUI biolerplate</TEXT>
    <PARAMS>
     <WWWPARAMS>
-     <RELID>MI</RELID>
-     <OBJID>ZGUIBP_JS_PREACT</OBJID>
      <NAME>fileextension</NAME>
      <VALUE>.js</VALUE>
     </WWWPARAMS>
     <WWWPARAMS>
-     <RELID>MI</RELID>
-     <OBJID>ZGUIBP_JS_PREACT</OBJID>
      <NAME>filename</NAME>
      <VALUE>index.js</VALUE>
     </WWWPARAMS>
     <WWWPARAMS>
-     <RELID>MI</RELID>
-     <OBJID>ZGUIBP_JS_PREACT</OBJID>
      <NAME>mimetype</NAME>
      <VALUE>text/javascript</VALUE>
     </WWWPARAMS>
